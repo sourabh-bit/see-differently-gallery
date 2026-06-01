@@ -16,7 +16,7 @@ export function Hero() {
     <section ref={ref} id="top" className="relative min-h-[110vh] bg-paper grain">
       <div className="grid grid-cols-1 md:grid-cols-12 min-h-[100vh] pt-32 pb-16 px-6 md:px-12 gap-8">
         {/* Left: typography */}
-        <motion.div style={{ opacity: fade }} className="md:col-span-7 flex flex-col justify-center">
+        <motion.div style={{ opacity: fade }} className="md:col-span-7 flex flex-col justify-center min-w-0">
           <div className="mono text-[11px] tracking-[0.3em] uppercase text-graphite mb-10">
             <span className="inline-block w-8 h-px bg-ink align-middle mr-3" />
             Mobile Photography Masterclass · 001
