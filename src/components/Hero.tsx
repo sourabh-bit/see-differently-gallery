@@ -21,7 +21,7 @@ export function Hero() {
             <span className="inline-block w-8 h-px bg-ink align-middle mr-3" />
             Mobile Photography Masterclass · 001
           </div>
-          <h1 className="serif font-light leading-[0.88] text-[14vw] md:text-[10.5vw] tracking-[-0.04em]">
+          <h1 className="serif font-light leading-[0.88] text-[12vw] md:text-[8.2vw] tracking-[-0.04em] whitespace-nowrap">
             {lines.map((line, i) => (
               <motion.span
                 key={line}
