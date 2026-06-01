@@ -1,7 +1,12 @@
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, type MotionValue } from "framer-motion";
 import { useRef } from "react";
 
 const QUOTE = "Photography isn't about equipment. It's about attention.";
+
+function Word({ progress, range, children }: { progress: MotionValue<number>; range: [number, number]; children: string }) {
+  const opacity = useTransform(progress, range, [0.15, 1]);
+  return <motion.span style={{ opacity }} className="inline-block mr-[0.25em]">{children}</motion.span>;
+}
 
 export function Philosophy() {
   const ref = useRef<HTMLDivElement>(null);
@@ -19,15 +24,7 @@ export function Philosophy() {
           {words.map((w, i) => {
             const start = i / words.length;
             const end = start + 1 / words.length;
-            const Word = () => {
-              const op = useTransform(scrollYProgress, [start, end], [0.15, 1]);
-              return (
-                <motion.span style={{ opacity: op }} className="inline-block mr-[0.25em]">
-                  {w}
-                </motion.span>
-              );
-            };
-            return <Word key={i} />;
+            return <Word key={i} progress={scrollYProgress} range={[start, end]}>{w}</Word>;
           })}
         </div>
 
