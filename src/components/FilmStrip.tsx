@@ -33,10 +33,19 @@ export function FilmStrip() {
           </h2>
         </div>
 
-        <div className="flex h-[70vh] min-h-[520px] items-center gap-2 md:gap-3">
+        <div className="flex h-[70vh] min-h-[480px] border-y border-paper/20 overflow-hidden">
           {strips.map((s, i) => {
             const isActive = active === i;
             return (
+              <motion.div
+                key={s.n}
+                data-cursor="image"
+                onMouseEnter={() => setActive(i)}
+                onClick={() => setActive(i)}
+                animate={{ flex: isActive ? 7 : 1 }}
+                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+                className="relative border-r border-paper/15 last:border-r-0 overflow-hidden cursor-none"
+              >
               <motion.div
                 key={s.n}
                 data-cursor="image"
