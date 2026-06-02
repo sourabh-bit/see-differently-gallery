@@ -46,16 +46,6 @@ export function FilmStrip() {
                 transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
                 className="relative border-r border-paper/15 last:border-r-0 overflow-hidden cursor-none"
               >
-              <motion.div
-                key={s.n}
-                data-cursor="image"
-                onMouseEnter={() => setActive(i)}
-                onClick={() => setActive(i)}
-                style={{ transform: `translateY(${s.y}%)` }}
-                animate={{ flex: isActive ? 7 : 1 }}
-                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-                className="relative h-[78%] overflow-hidden cursor-none"
-              >
                 <motion.img
                   src={s.img}
                   alt={s.title}
