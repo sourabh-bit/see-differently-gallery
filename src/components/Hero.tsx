@@ -10,7 +10,7 @@ export function Hero() {
   const driftY = useTransform(scrollYProgress, [0, 1], [0, 30]);
   const fade = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
-  const lines = ["ONE DAY.", "ONE PHONE.", "A DIFFERENT EYE."];
+  
 
   return (
     <section ref={ref} id="top" className="relative min-h-[110vh] bg-paper grain">
