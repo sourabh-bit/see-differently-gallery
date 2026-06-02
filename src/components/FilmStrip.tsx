@@ -9,17 +9,17 @@ import f6 from "@/assets/film-06.jpg";
 import f7 from "@/assets/film-07.jpg";
 
 const strips = [
-  { n: "01", title: "Portraits", desc: "Reading faces. Catching the half-second between expressions.", img: f1, h: 78, y: 6 },
-  { n: "02", title: "Street", desc: "Anticipating geometry, light and a stranger's stride.", img: f2, h: 92, y: 0 },
-  { n: "03", title: "Low Light", desc: "Working with shadow instead of fighting it.", img: f3, h: 70, y: 14 },
-  { n: "04", title: "Product", desc: "One object. One light. Infinite restraint.", img: f4, h: 86, y: 4 },
-  { n: "05", title: "Travel", desc: "Scale, solitude and the dignity of distance.", img: f5, h: 74, y: 10 },
-  { n: "06", title: "Storytelling", desc: "Sequencing frames so they breathe together.", img: f6, h: 96, y: 0 },
-  { n: "07", title: "Editing", desc: "Cutting until what's left is the only thing left.", img: f7, h: 80, y: 8 },
+  { n: "01", title: "Portraits", desc: "Reading faces. Catching the half-second between expressions.", img: f1, y: 6 },
+  { n: "02", title: "Street", desc: "Anticipating geometry, light and a stranger's stride.", img: f2, y: -4 },
+  { n: "03", title: "Low Light", desc: "Working with shadow instead of fighting it.", img: f3, y: 10 },
+  { n: "04", title: "Product", desc: "One object. One light. Infinite restraint.", img: f4, y: -8 },
+  { n: "05", title: "Travel", desc: "Scale, solitude and the dignity of distance.", img: f5, y: 4 },
+  { n: "06", title: "Storytelling", desc: "Sequencing frames so they breathe together.", img: f6, y: -2 },
+  { n: "07", title: "Editing", desc: "Cutting until what's left is the only thing left.", img: f7, y: 8 },
 ];
 
 export function FilmStrip() {
-  const [active, setActive] = useState<number | null>(null);
+  const [active, setActive] = useState(0);
 
   return (
     <section id="gallery" className="bg-ink text-paper py-32 md:py-48 px-6 md:px-12">
@@ -33,66 +33,62 @@ export function FilmStrip() {
           </h2>
         </div>
 
-        <div className="relative h-[70vh] min-h-[520px] flex items-center justify-center gap-3 md:gap-5">
+        <div className="flex h-[70vh] min-h-[520px] items-center gap-2 md:gap-3">
           {strips.map((s, i) => {
             const isActive = active === i;
-            const dimmed = active !== null && !isActive;
             return (
               <motion.div
                 key={s.n}
                 data-cursor="image"
                 onMouseEnter={() => setActive(i)}
-                onMouseLeave={() => setActive(null)}
-                style={{ height: `${s.h}%`, marginTop: `${s.y}%` }}
-                animate={{ scale: isActive ? 1.04 : 1 }}
-                transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                className="relative flex-1 max-w-[140px] overflow-hidden cursor-none"
+                onClick={() => setActive(i)}
+                style={{ transform: `translateY(${s.y}%)` }}
+                animate={{ flex: isActive ? 7 : 1 }}
+                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+                className="relative h-[78%] overflow-hidden cursor-none"
               >
                 <motion.img
                   src={s.img}
                   alt={s.title}
-                  width={400}
-                  height={1200}
+                  width={768}
+                  height={1024}
                   loading="lazy"
-                  animate={{ opacity: isActive ? 1 : dimmed ? 0.18 : 0.4 }}
-                  transition={{ duration: 0.6 }}
+                  animate={{
+                    scale: isActive ? 1 : 1.4,
+                    opacity: isActive ? 1 : 0.35,
+                  }}
+                  transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
                   className="absolute inset-0 w-full h-full object-cover bw-img"
                 />
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 mono text-[9px] tracking-[0.4em] uppercase text-paper/70">
+                <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-transparent to-ink/20" />
+
+                <div className="absolute top-6 left-1/2 -translate-x-1/2 mono text-[10px] tracking-[0.4em] uppercase text-paper/80">
                   {s.n}
                 </div>
+
                 <AnimatePresence>
                   {isActive && (
                     <motion.div
-                      key="cap"
-                      initial={{ opacity: 0, y: 10 }}
+                      key="info"
+                      initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
-                      transition={{ duration: 0.4 }}
-                      className="absolute bottom-4 left-0 right-0 text-center px-2"
+                      transition={{ delay: 0.3, duration: 0.6 }}
+                      className="absolute bottom-0 left-0 right-0 p-8 md:p-10"
                     >
-                      <div className="serif text-base md:text-lg leading-tight">{s.title}</div>
+                      <div className="mono text-[10px] tracking-[0.3em] uppercase text-paper/60 mb-3">
+                        Chapter {s.n}
+                      </div>
+                      <div className="serif text-5xl md:text-7xl leading-none">{s.title}</div>
+                      <p className="mt-4 max-w-md text-paper/75 text-sm md:text-base">
+                        {s.desc}
+                      </p>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </motion.div>
             );
           })}
-        </div>
-
-        <div className="mt-16 text-center min-h-[80px]">
-          <AnimatePresence mode="wait">
-            <motion.p
-              key={active ?? "default"}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.4 }}
-              className="serif italic text-paper/70 text-lg md:text-xl max-w-2xl mx-auto"
-            >
-              {active !== null ? strips[active].desc : "Hover a strip — explore the chapters."}
-            </motion.p>
-          </AnimatePresence>
         </div>
       </div>
     </section>
