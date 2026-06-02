@@ -10,7 +10,7 @@ export function Hero() {
   const driftY = useTransform(scrollYProgress, [0, 1], [0, 30]);
   const fade = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
-  const lines = ["ONE DAY.", "ONE PHONE.", "A DIFFERENT EYE."];
+  
 
   return (
     <section ref={ref} id="top" className="relative min-h-[110vh] bg-paper grain">
@@ -21,33 +21,42 @@ export function Hero() {
             <span className="inline-block w-8 h-px bg-ink align-middle mr-3" />
             Mobile Photography Masterclass · 001
           </div>
-          <h1 className="serif font-light leading-[0.88] text-[12vw] md:text-[8.2vw] tracking-[-0.04em] whitespace-nowrap">
-            {lines.map((line, i) => (
-              <motion.span
-                key={line}
+          <h1 className="serif font-light leading-[0.9] tracking-[-0.04em]">
+            <motion.span
+              className="block text-[14vw] md:text-[9.5vw] whitespace-nowrap"
+              initial={{ y: "110%", opacity: 0 }}
+              animate={{ y: "0%", opacity: 1 }}
+              transition={{ duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            >
+              ONE DAY.
+            </motion.span>
+            <motion.span
+              style={{ x: driftX }}
+              className="block text-[14vw] md:text-[9.5vw] whitespace-nowrap"
+              initial={{ y: "110%", opacity: 0 }}
+              animate={{ y: "0%", opacity: 1 }}
+              transition={{ duration: 0.9, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            >
+              ONE PHONE.
+            </motion.span>
+            <motion.span
+              style={{ y: driftY }}
+              className="block whitespace-nowrap text-[9vw] md:text-[5.4vw] mt-3 flex items-baseline gap-[0.25em]"
+              initial={{ y: "110%", opacity: 0 }}
+              animate={{ y: "0%", opacity: 1 }}
+              transition={{ duration: 0.9, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <span>A DIFFERENT</span>
+              <span
+                className="italic font-normal"
                 style={{
-                  x: i === 1 ? driftX : 0,
-                  y: i === 2 ? driftY : 0,
+                  WebkitTextStroke: "1.25px currentColor",
+                  WebkitTextFillColor: "transparent",
                 }}
-                className="block"
               >
-                {line.split("").map((ch, j) => (
-                  <motion.span
-                    key={j}
-                    initial={{ y: "110%", opacity: 0 }}
-                    animate={{ y: "0%", opacity: 1 }}
-                    transition={{
-                      delay: 0.2 + i * 0.15 + j * 0.02,
-                      duration: 0.9,
-                      ease: [0.22, 1, 0.36, 1],
-                    }}
-                    className="inline-block"
-                  >
-                    {ch === " " ? "\u00A0" : ch}
-                  </motion.span>
-                ))}
-              </motion.span>
-            ))}
+                Eye.
+              </span>
+            </motion.span>
           </h1>
 
           <div className="mt-12 max-w-md grid grid-cols-3 gap-6 text-[11px] mono uppercase tracking-[0.2em] text-graphite">
