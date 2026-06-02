@@ -46,16 +46,7 @@ export function Hero() {
               animate={{ y: "0%", opacity: 1 }}
               transition={{ duration: 0.9, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
-              <span>A DIFFERENT</span>
-              <span
-                className="italic font-normal"
-                style={{
-                  WebkitTextStroke: "1.25px currentColor",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
-                Eye.
-              </span>
+              <span>A DIFFERENT EYE.</span>
             </motion.span>
           </h1>
 
