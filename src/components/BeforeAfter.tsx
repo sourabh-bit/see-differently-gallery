@@ -49,7 +49,7 @@ export function BeforeAfter() {
             onMouseMove={(e) => drag && move(e.clientX)}
             onTouchStart={(e) => { setDrag(true); move(e.touches[0].clientX); }}
             onTouchMove={(e) => move(e.touches[0].clientX)}
-            className="md:col-span-7 relative w-full aspect-[4/5] md:aspect-[4/5] overflow-hidden select-none border border-ink/20"
+            className="md:col-span-7 order-1 md:order-2 relative w-full aspect-[4/5] overflow-hidden select-none border border-ink/20 touch-none"
             data-cursor="image"
           >
             <img src={after} alt="After" width={1024} height={1024}
