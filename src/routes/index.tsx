@@ -35,7 +35,7 @@ function Index() {
   return (
     <SmoothScroll>
       <Cursor />
-      <main className="bg-paper text-ink">
+      <main className="bg-paper text-ink overflow-x-hidden w-full">
         <Nav />
         <Hero />
         <Marquee />
