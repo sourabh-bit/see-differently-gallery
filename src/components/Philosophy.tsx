@@ -14,13 +14,13 @@ export function Philosophy() {
   const words = QUOTE.split(" ");
 
   return (
-    <section id="philosophy" className="bg-paper py-32 md:py-48 px-6 md:px-12">
+    <section id="philosophy" className="bg-paper py-20 md:py-48 px-6 md:px-12">
       <div className="max-w-6xl mx-auto">
-        <div className="mono text-[11px] tracking-[0.3em] uppercase text-graphite mb-12 flex items-center gap-4">
-          <span className="w-8 h-px bg-ink" /> 01 — The Philosophy
+        <div className="mono text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-graphite mb-8 md:mb-12 flex items-center gap-3 md:gap-4">
+          <span className="w-6 md:w-8 h-px bg-ink" /> 01 — The Philosophy
         </div>
 
-        <div ref={ref} className="serif text-[7vw] md:text-[5vw] leading-[1.05] tracking-[-0.02em] text-balance">
+        <div ref={ref} className="serif text-[9vw] md:text-[5vw] leading-[1.05] tracking-[-0.02em] text-balance">
           {words.map((w, i) => {
             const start = i / words.length;
             const end = start + 1 / words.length;
