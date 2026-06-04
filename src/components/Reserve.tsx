@@ -15,17 +15,17 @@ export function Reserve() {
   };
 
   return (
-    <section id="reserve" className="bg-ink text-paper py-32 md:py-48 px-6 md:px-12 grain">
+    <section id="reserve" className="bg-ink text-paper py-24 md:py-48 px-6 md:px-12 grain">
       <div className="max-w-6xl mx-auto">
-        <div className="mono text-[11px] tracking-[0.3em] uppercase text-paper/60 mb-10 flex items-center gap-4">
-          <span className="w-8 h-px bg-paper/60" /> 06 — Reserve Your Seat
+        <div className="mono text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-paper/60 mb-8 md:mb-10 flex items-center gap-3 md:gap-4">
+          <span className="w-6 md:w-8 h-px bg-paper/60" /> 06 — Reserve Your Seat
         </div>
 
-        <div className="grid md:grid-cols-12 gap-10 items-end mb-16">
-          <h2 className="serif col-span-12 md:col-span-9 text-7xl md:text-[9vw] leading-[0.9]">
+        <div className="grid md:grid-cols-12 gap-6 md:gap-10 items-end mb-12 md:mb-16">
+          <h2 className="serif col-span-12 md:col-span-9 text-5xl sm:text-6xl md:text-[9vw] leading-[0.9]">
             <span className="italic">{seats}</span> seats left.
           </h2>
-          <p className="col-span-12 md:col-span-3 text-paper/60">
+          <p className="col-span-12 md:col-span-3 text-paper/60 text-sm md:text-base">
             One workshop. Capped at twelve students. No replays sold separately.
           </p>
         </div>
