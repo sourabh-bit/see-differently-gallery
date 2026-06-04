@@ -11,7 +11,7 @@ export function Nav() {
           <a href="#journey">Journey</a>
           <a href="#reserve">Reserve</a>
         </nav>
-        <span className="mono text-[11px] tracking-[0.2em] uppercase">Jul 15 · 10:00</span>
+        <span className="mono text-[10px] md:text-[11px] tracking-[0.2em] uppercase">Jul 15 · 10:00</span>
       </div>
     </header>
   );
