@@ -1,10 +1,10 @@
 export function Footer() {
   return (
-    <footer className="bg-paper border-t border-ink/15 px-6 md:px-12 py-16">
+    <footer className="bg-paper border-t border-ink/15 px-6 md:px-12 py-12 md:py-16">
       <div className="max-w-7xl mx-auto grid md:grid-cols-12 gap-10">
         <div className="md:col-span-6">
-          <div className="serif italic text-5xl md:text-7xl leading-none">seen/differently</div>
-          <p className="mt-6 text-graphite max-w-md">
+          <div className="serif italic text-4xl md:text-7xl leading-none">seen/differently</div>
+          <p className="mt-5 md:mt-6 text-graphite max-w-md text-sm md:text-base">
             A one-day mobile photography masterclass by R. Ardon. Lisbon — recorded for those who can't attend in person.
           </p>
         </div>

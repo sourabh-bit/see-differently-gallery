@@ -22,18 +22,43 @@ export function FilmStrip() {
   const [active, setActive] = useState(0);
 
   return (
-    <section id="gallery" className="bg-ink text-paper py-32 md:py-48 px-6 md:px-12">
+    <section id="gallery" className="bg-ink text-paper py-20 md:py-48 px-6 md:px-12">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-20">
-          <div className="mono text-[11px] tracking-[0.3em] uppercase text-paper/60 mb-6 flex items-center justify-center gap-4">
-            <span className="w-8 h-px bg-paper/60" /> 02 — Moments You Will Learn To Capture <span className="w-8 h-px bg-paper/60" />
+        <div className="text-center mb-12 md:mb-20">
+          <div className="mono text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-paper/60 mb-5 md:mb-6 flex items-center justify-center gap-3 md:gap-4">
+            <span className="w-6 md:w-8 h-px bg-paper/60" /> 02 — Moments <span className="w-6 md:w-8 h-px bg-paper/60" />
           </div>
-          <h2 className="serif text-6xl md:text-8xl leading-[0.95]">
+          <h2 className="serif text-4xl sm:text-5xl md:text-8xl leading-[0.95]">
             Seven frames. <span className="italic">One way</span> of seeing.
           </h2>
         </div>
 
-        <div className="flex h-[70vh] min-h-[480px] border-y border-paper/20 overflow-hidden">
+        {/* Mobile: vertical stacked cards */}
+        <div className="md:hidden flex flex-col gap-4 border-y border-paper/20 py-6">
+          {strips.map((s) => (
+            <div key={s.n} className="relative aspect-[4/5] overflow-hidden">
+              <img
+                src={s.img}
+                alt={s.title}
+                width={768}
+                height={1024}
+                loading="lazy"
+                className="absolute inset-0 w-full h-full object-cover bw-img"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/10 to-transparent" />
+              <div className="absolute top-4 left-4 mono text-[10px] tracking-[0.4em] uppercase text-paper/80">
+                {s.n}
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 p-5">
+                <div className="serif text-4xl leading-none">{s.title}</div>
+                <p className="mt-2 text-paper/75 text-sm">{s.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop: expanding film strip */}
+        <div className="hidden md:flex h-[70vh] min-h-[480px] border-y border-paper/20 overflow-hidden">
           {strips.map((s, i) => {
             const isActive = active === i;
             return (

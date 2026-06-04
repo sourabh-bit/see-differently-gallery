@@ -75,7 +75,9 @@
     font-family: var(--font-sans);
     font-weight: 300;
     -webkit-font-smoothing: antialiased;
-    cursor: none;
+  }
+  @media (pointer: fine) {
+    body { cursor: none; }
   }
   ::selection { background: var(--color-ink); color: var(--color-paper); }
   h1, h2, h3, .serif { font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.02em; }
