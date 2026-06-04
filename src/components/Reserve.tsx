@@ -46,16 +46,16 @@ export function Reserve() {
 
           <div className="grid md:grid-cols-12">
             {/* Stub */}
-            <div className="md:col-span-4 p-10 md:p-12 border-r border-dashed border-ink/30 flex flex-col justify-between gap-10">
+            <div className="md:col-span-4 p-7 md:p-12 border-b md:border-b-0 md:border-r border-dashed border-ink/30 flex flex-col justify-between gap-8 md:gap-10">
               <div>
                 <div className="mono text-[10px] tracking-[0.3em] uppercase text-graphite">Admit One</div>
-                <div className="serif text-5xl mt-3 leading-none">N°<span className="italic">012</span></div>
+                <div className="serif text-4xl md:text-5xl mt-3 leading-none">N°<span className="italic">012</span></div>
               </div>
               <div className="space-y-1">
                 <div className="mono text-[10px] tracking-[0.3em] uppercase text-graphite">Date</div>
-                <div className="serif text-3xl leading-none">July 15</div>
+                <div className="serif text-2xl md:text-3xl leading-none">July 15</div>
                 <div className="mono text-[10px] tracking-[0.3em] uppercase text-graphite mt-3">Doors</div>
-                <div className="serif text-3xl leading-none">10:00 AM</div>
+                <div className="serif text-2xl md:text-3xl leading-none">10:00 AM</div>
               </div>
               <div className="mono text-[9px] tracking-[0.25em] uppercase text-graphite">
                 Non-transferable · Lifetime replay
@@ -63,7 +63,7 @@ export function Reserve() {
             </div>
 
             {/* Main */}
-            <div className="md:col-span-8 p-10 md:p-14">
+            <div className="md:col-span-8 p-7 md:p-14">
               <div className="serif text-4xl md:text-6xl leading-[0.95]">
                 Mobile Photography <span className="italic">Masterclass</span>
               </div>
