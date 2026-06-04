@@ -25,17 +25,17 @@ export function BeforeAfter() {
   };
 
   return (
-    <section className="bg-paper py-32 md:py-48 px-6 md:px-12">
+    <section className="bg-paper py-20 md:py-48 px-6 md:px-12">
       <div className="max-w-7xl mx-auto">
-        <div className="mono text-[11px] tracking-[0.3em] uppercase text-graphite mb-10 flex items-center gap-4">
-          <span className="w-8 h-px bg-ink" /> 04 — Same Phone. New Eye.
+        <div className="mono text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-graphite mb-8 md:mb-10 flex items-center gap-3 md:gap-4">
+          <span className="w-6 md:w-8 h-px bg-ink" /> 04 — Same Phone. New Eye.
         </div>
-        <div className="grid md:grid-cols-12 gap-10 md:gap-16 items-center">
-          <div className="md:col-span-5 flex flex-col gap-8">
-            <h2 className="serif text-5xl md:text-6xl leading-[0.95]">
+        <div className="grid md:grid-cols-12 gap-8 md:gap-16 items-center">
+          <div className="md:col-span-5 flex flex-col gap-5 md:gap-8 order-2 md:order-1">
+            <h2 className="serif text-4xl md:text-6xl leading-[0.95]">
               Drag to see what one <span className="italic">day</span> changes.
             </h2>
-            <p className="text-graphite max-w-sm">
+            <p className="text-graphite max-w-sm text-sm md:text-base">
               Both frames were taken with the same phone, in the same room, by the same student — eight hours apart.
             </p>
             <div className="mono text-[10px] tracking-[0.3em] uppercase text-graphite">
