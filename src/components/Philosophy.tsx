@@ -28,16 +28,16 @@ export function Philosophy() {
           })}
         </div>
 
-        <div className="mt-20 grid md:grid-cols-12 gap-8 items-end">
+        <div className="mt-12 md:mt-20 grid md:grid-cols-12 gap-6 md:gap-8 items-end">
           <div className="md:col-span-5">
-            <p className="serif italic text-3xl md:text-4xl leading-snug">
+            <p className="serif italic text-2xl md:text-4xl leading-snug">
               Your camera is not the problem.
             </p>
-            <p className="mt-3 text-graphite max-w-sm">
+            <p className="mt-3 text-graphite max-w-sm text-sm md:text-base">
               Your eye is. And that — unlike a sensor — can be trained in a single, deliberate day.
             </p>
           </div>
-          <div className="md:col-span-3 md:col-start-9 text-right">
+          <div className="md:col-span-3 md:col-start-9 md:text-right">
             <div className="mono text-[10px] tracking-[0.3em] uppercase text-graphite">— R. Ardon</div>
             <div className="mono text-[10px] tracking-[0.3em] uppercase text-graphite">Photographer · Mentor</div>
           </div>
