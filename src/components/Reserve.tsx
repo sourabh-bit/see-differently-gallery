@@ -64,14 +64,14 @@ export function Reserve() {
 
             {/* Main */}
             <div className="md:col-span-8 p-7 md:p-14">
-              <div className="serif text-4xl md:text-6xl leading-[0.95]">
+              <div className="serif text-3xl sm:text-4xl md:text-6xl leading-[0.95]">
                 Mobile Photography <span className="italic">Masterclass</span>
               </div>
-              <p className="mt-4 text-graphite max-w-md">
+              <p className="mt-3 md:mt-4 text-graphite max-w-md text-sm md:text-base">
                 Reserve in thirty seconds. We'll confirm seat, syllabus and payment via WhatsApp.
               </p>
 
-              <form onSubmit={onSubmit} className="mt-10 grid gap-8">
+              <form onSubmit={onSubmit} className="mt-8 md:mt-10 grid gap-6 md:gap-8">
                 <label className="block">
                   <div className="mono text-[10px] tracking-[0.3em] uppercase text-graphite mb-2">Your name</div>
                   <input
