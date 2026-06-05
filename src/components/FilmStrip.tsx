@@ -34,7 +34,7 @@ export function FilmStrip() {
         </div>
 
         {/* Expanding film strip (mobile + desktop) */}
-        <div className="flex h-[60vh] md:h-[70vh] min-h-[420px] md:min-h-[480px] border-y border-paper/20 overflow-hidden">
+        <div className="flex h-[70vh] md:h-[70vh] min-h-[520px] md:min-h-[480px] border-y border-paper/20 overflow-hidden">
           {strips.map((s, i) => {
             const isActive = active === i;
             return (
@@ -43,7 +43,7 @@ export function FilmStrip() {
                 data-cursor="image"
                 onMouseEnter={() => setActive(i)}
                 onClick={() => setActive(i)}
-                animate={{ flex: isActive ? 7 : 1 }}
+                animate={{ flex: isActive ? 8 : 1 }}
                 transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
                 className="relative border-r border-paper/15 last:border-r-0 overflow-hidden cursor-none"
               >
@@ -55,10 +55,13 @@ export function FilmStrip() {
                   loading="lazy"
                   animate={{
                     scale: isActive ? 1 : 1.4,
-                    opacity: isActive ? 1 : 0.35,
+                    opacity: isActive ? 1 : 0.4,
+                    filter: isActive
+                      ? "grayscale(0) contrast(1.05) saturate(1.1)"
+                      : "grayscale(1) contrast(1.05)",
                   }}
-                  transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-                  className="absolute inset-0 w-full h-full object-cover bw-img"
+                  transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-transparent to-ink/20" />
 
