@@ -33,32 +33,8 @@ export function FilmStrip() {
           </h2>
         </div>
 
-        {/* Mobile: vertical stacked cards */}
-        <div className="md:hidden flex flex-col gap-4 border-y border-paper/20 py-6">
-          {strips.map((s) => (
-            <div key={s.n} className="relative aspect-[4/5] overflow-hidden">
-              <img
-                src={s.img}
-                alt={s.title}
-                width={768}
-                height={1024}
-                loading="lazy"
-                className="absolute inset-0 w-full h-full object-cover bw-img"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/10 to-transparent" />
-              <div className="absolute top-4 left-4 mono text-[10px] tracking-[0.4em] uppercase text-paper/80">
-                {s.n}
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 p-5">
-                <div className="serif text-4xl leading-none">{s.title}</div>
-                <p className="mt-2 text-paper/75 text-sm">{s.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Desktop: expanding film strip */}
-        <div className="hidden md:flex h-[70vh] min-h-[480px] border-y border-paper/20 overflow-hidden">
+        {/* Expanding film strip (mobile + desktop) */}
+        <div className="flex h-[60vh] md:h-[70vh] min-h-[420px] md:min-h-[480px] border-y border-paper/20 overflow-hidden">
           {strips.map((s, i) => {
             const isActive = active === i;
             return (
