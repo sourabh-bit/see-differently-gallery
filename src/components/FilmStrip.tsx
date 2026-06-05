@@ -34,7 +34,7 @@ export function FilmStrip() {
         </div>
 
         {/* Expanding film strip (mobile + desktop) */}
-        <div className="flex h-[60vh] md:h-[70vh] min-h-[420px] md:min-h-[480px] border-y border-paper/20 overflow-hidden">
+        <div className="flex h-[70vh] md:h-[70vh] min-h-[520px] md:min-h-[480px] border-y border-paper/20 overflow-hidden">
           {strips.map((s, i) => {
             const isActive = active === i;
             return (
