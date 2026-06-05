@@ -74,13 +74,13 @@ export function FilmStrip() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
                       transition={{ delay: 0.3, duration: 0.6 }}
-                      className="absolute bottom-0 left-0 right-0 p-8 md:p-10"
+                      className="absolute bottom-0 left-0 right-0 p-5 md:p-10"
                     >
-                      <div className="mono text-[10px] tracking-[0.3em] uppercase text-paper/60 mb-3">
+                      <div className="mono text-[9px] md:text-[10px] tracking-[0.3em] uppercase text-paper/60 mb-2 md:mb-3">
                         Chapter {s.n}
                       </div>
-                      <div className="serif text-5xl md:text-7xl leading-none">{s.title}</div>
-                      <p className="mt-4 max-w-md text-paper/75 text-sm md:text-base">
+                      <div className="serif text-3xl md:text-7xl leading-none">{s.title}</div>
+                      <p className="mt-2 md:mt-4 max-w-md text-paper/75 text-xs md:text-base">
                         {s.desc}
                       </p>
                     </motion.div>
