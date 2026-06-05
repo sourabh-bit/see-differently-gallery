@@ -13,7 +13,7 @@ export function Hero() {
   
 
   return (
-    <section ref={ref} id="top" className="relative min-h-[100vh] md:min-h-[110vh] bg-paper grain">
+    <section ref={ref} id="top" className="relative min-h-[100vh] md:min-h-[110vh] bg-paper grain overflow-hidden">
       <div className="grid grid-cols-1 md:grid-cols-12 min-h-[100vh] pt-24 md:pt-32 pb-12 md:pb-16 px-6 md:px-12 gap-10 md:gap-8">
         {/* Left: typography */}
         <motion.div style={{ opacity: fade }} className="md:col-span-7 flex flex-col justify-center min-w-0 order-2 md:order-1">
