@@ -33,32 +33,8 @@ export function FilmStrip() {
           </h2>
         </div>
 
-        {/* Mobile: vertical stacked cards */}
-        <div className="md:hidden flex flex-col gap-4 border-y border-paper/20 py-6">
-          {strips.map((s) => (
-            <div key={s.n} className="relative aspect-[4/5] overflow-hidden">
-              <img
-                src={s.img}
-                alt={s.title}
-                width={768}
-                height={1024}
-                loading="lazy"
-                className="absolute inset-0 w-full h-full object-cover bw-img"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/10 to-transparent" />
-              <div className="absolute top-4 left-4 mono text-[10px] tracking-[0.4em] uppercase text-paper/80">
-                {s.n}
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 p-5">
-                <div className="serif text-4xl leading-none">{s.title}</div>
-                <p className="mt-2 text-paper/75 text-sm">{s.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Desktop: expanding film strip */}
-        <div className="hidden md:flex h-[70vh] min-h-[480px] border-y border-paper/20 overflow-hidden">
+        {/* Expanding film strip (mobile + desktop) */}
+        <div className="flex h-[60vh] md:h-[70vh] min-h-[420px] md:min-h-[480px] border-y border-paper/20 overflow-hidden">
           {strips.map((s, i) => {
             const isActive = active === i;
             return (
@@ -98,13 +74,13 @@ export function FilmStrip() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
                       transition={{ delay: 0.3, duration: 0.6 }}
-                      className="absolute bottom-0 left-0 right-0 p-8 md:p-10"
+                      className="absolute bottom-0 left-0 right-0 p-5 md:p-10"
                     >
-                      <div className="mono text-[10px] tracking-[0.3em] uppercase text-paper/60 mb-3">
+                      <div className="mono text-[9px] md:text-[10px] tracking-[0.3em] uppercase text-paper/60 mb-2 md:mb-3">
                         Chapter {s.n}
                       </div>
-                      <div className="serif text-5xl md:text-7xl leading-none">{s.title}</div>
-                      <p className="mt-4 max-w-md text-paper/75 text-sm md:text-base">
+                      <div className="serif text-3xl md:text-7xl leading-none">{s.title}</div>
+                      <p className="mt-2 md:mt-4 max-w-md text-paper/75 text-xs md:text-base">
                         {s.desc}
                       </p>
                     </motion.div>
