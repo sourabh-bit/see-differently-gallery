@@ -33,11 +33,11 @@ export function Journey() {
           {panels.map((p, i) => (
             <div
               key={p.n}
-              className="w-screen h-full flex-shrink-0 grid grid-cols-12 items-center px-6 md:px-20 gap-6 md:gap-8 pt-24 md:pt-0"
+              className="w-screen h-full flex-shrink-0 grid grid-cols-12 items-center px-6 md:px-20 gap-6 md:gap-8"
             >
               <div className="col-span-12 md:col-span-5 flex flex-col gap-4 md:gap-6">
                 <div className="serif italic text-xl md:text-2xl text-graphite">{p.n}.</div>
-                <h3 className="serif text-[22vw] md:text-[12vw] leading-[0.85] tracking-[-0.03em]">
+                <h3 className="serif text-[14vw] md:text-[12vw] leading-[0.85] tracking-[-0.03em]">
                   {p.word}.
                 </h3>
                 <p className="text-graphite max-w-sm text-sm md:text-lg">{p.caption}</p>
@@ -45,7 +45,7 @@ export function Journey() {
                   Hour {i + 1} of 7
                 </div>
               </div>
-              <div className="col-span-12 md:col-span-6 md:col-start-7 h-[32vh] md:h-[70vh]" data-cursor="image">
+              <div className="hidden md:block col-span-12 md:col-span-6 md:col-start-7 h-[70vh]" data-cursor="image">
                 <img
                   src={p.img}
                   alt={p.word}
