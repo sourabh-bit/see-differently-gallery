@@ -44,6 +44,7 @@ function Index() {
         <FilmStrip />
         <Journey />
         <BeforeAfter />
+        <WhyChooseMe />
         <Testimonials />
         <Reserve />
         <Footer />
