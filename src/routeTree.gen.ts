@@ -9,38 +9,75 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ReservationRefRouteImport } from './routes/reservation.$ref'
+import { Route as PaymentRefRouteImport } from './routes/payment.$ref'
 
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReservationRefRoute = ReservationRefRouteImport.update({
+  id: '/reservation/$ref',
+  path: '/reservation/$ref',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentRefRoute = PaymentRefRouteImport.update({
+  id: '/payment/$ref',
+  path: '/payment/$ref',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/payment/$ref': typeof PaymentRefRoute
+  '/reservation/$ref': typeof ReservationRefRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/payment/$ref': typeof PaymentRefRoute
+  '/reservation/$ref': typeof ReservationRefRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/payment/$ref': typeof PaymentRefRoute
+  '/reservation/$ref': typeof ReservationRefRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/admin' | '/payment/$ref' | '/reservation/$ref'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/admin' | '/payment/$ref' | '/reservation/$ref'
+  id: '__root__' | '/' | '/admin' | '/payment/$ref' | '/reservation/$ref'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
+  PaymentRefRoute: typeof PaymentRefRoute
+  ReservationRefRoute: typeof ReservationRefRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +85,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reservation/$ref': {
+      id: '/reservation/$ref'
+      path: '/reservation/$ref'
+      fullPath: '/reservation/$ref'
+      preLoaderRoute: typeof ReservationRefRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payment/$ref': {
+      id: '/payment/$ref'
+      path: '/payment/$ref'
+      fullPath: '/payment/$ref'
+      preLoaderRoute: typeof PaymentRefRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
+  PaymentRefRoute: PaymentRefRoute,
+  ReservationRefRoute: ReservationRefRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
