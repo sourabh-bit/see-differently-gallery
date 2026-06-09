@@ -10,13 +10,18 @@ export function Hero() {
   const driftY = useTransform(scrollYProgress, [0, 1], [0, 30]);
   const fade = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
-  
-
   return (
-    <section ref={ref} id="top" className="relative min-h-[100vh] md:min-h-[110vh] bg-paper grain overflow-hidden">
+    <section
+      ref={ref}
+      id="top"
+      className="relative min-h-[100vh] md:min-h-[110vh] bg-paper grain overflow-hidden"
+    >
       <div className="grid grid-cols-1 md:grid-cols-12 min-h-[100vh] pt-24 md:pt-32 pb-12 md:pb-16 px-6 md:px-12 gap-10 md:gap-8">
         {/* Left: typography */}
-        <motion.div style={{ opacity: fade }} className="md:col-span-7 flex flex-col justify-center min-w-0 order-2 md:order-1">
+        <motion.div
+          style={{ opacity: fade }}
+          className="md:col-span-7 flex flex-col justify-center min-w-0 order-2 md:order-1"
+        >
           <div className="mono text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-graphite mb-6 md:mb-10">
             <span className="inline-block w-6 md:w-8 h-px bg-ink align-middle mr-3" />
             Masterclass · 001
@@ -52,15 +57,21 @@ export function Hero() {
 
           <div className="mt-10 md:mt-12 max-w-md grid grid-cols-3 gap-4 md:gap-6 text-[10px] md:text-[11px] mono uppercase tracking-[0.2em] text-graphite">
             <div>
-              <div className="text-ink serif text-2xl md:text-3xl normal-case tracking-normal">07h</div>
+              <div className="text-ink serif text-2xl md:text-3xl normal-case tracking-normal">
+                07h
+              </div>
               <div className="mt-1">Live session</div>
             </div>
             <div>
-              <div className="text-ink serif text-2xl md:text-3xl normal-case tracking-normal">12</div>
+              <div className="text-ink serif text-2xl md:text-3xl normal-case tracking-normal">
+                12
+              </div>
               <div className="mt-1">Seats only</div>
             </div>
             <div>
-              <div className="text-ink serif text-2xl md:text-3xl normal-case tracking-normal">∞</div>
+              <div className="text-ink serif text-2xl md:text-3xl normal-case tracking-normal">
+                ∞
+              </div>
               <div className="mt-1">After replay</div>
             </div>
           </div>
@@ -73,7 +84,7 @@ export function Hero() {
               src={portrait}
               alt="Photographer holding smartphone as viewfinder"
               width={1024}
-              height={1408}
+              height={1208}
               style={{ scale: zoom }}
               className="w-full h-full object-cover bw-img"
             />
@@ -95,8 +106,12 @@ export function Hero() {
         preserveAspectRatio="none"
       >
         <motion.line
-          x1="0" y1="0.5" x2="1000" y2="0.5"
-          stroke="currentColor" strokeWidth="0.5"
+          x1="0"
+          y1="0.5"
+          x2="1000"
+          y2="0.5"
+          stroke="currentColor"
+          strokeWidth="0.5"
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
           transition={{ duration: 1.6, delay: 0.6, ease: [0.22, 1, 0.36, 1] }}

@@ -36,7 +36,8 @@ export function BeforeAfter() {
               Drag to see what one <span className="italic">day</span> changes.
             </h2>
             <p className="text-graphite max-w-sm text-sm md:text-base">
-              Both frames were taken with the same phone, in the same room, by the same student — eight hours apart.
+              Both frames were taken with the same phone, in the same room, by the same student —
+              eight hours apart.
             </p>
             <div className="mono text-[10px] tracking-[0.3em] uppercase text-graphite">
               Drag the handle ‹›
@@ -45,22 +46,35 @@ export function BeforeAfter() {
 
           <div
             ref={ref}
-            onMouseDown={(e) => { setDrag(true); move(e.clientX); }}
+            onMouseDown={(e) => {
+              setDrag(true);
+              move(e.clientX);
+            }}
             onMouseMove={(e) => drag && move(e.clientX)}
-            onTouchStart={(e) => { setDrag(true); move(e.touches[0].clientX); }}
+            onTouchStart={(e) => {
+              setDrag(true);
+              move(e.touches[0].clientX);
+            }}
             onTouchMove={(e) => move(e.touches[0].clientX)}
             className="md:col-span-7 order-1 md:order-2 relative w-full aspect-[4/5] overflow-hidden select-none border border-ink/20 touch-none"
             data-cursor="image"
           >
-            <img src={after} alt="After" width={1024} height={1024}
-                 className="absolute inset-0 w-full h-full object-cover bw-img" />
-            <div
-              className="absolute inset-0 overflow-hidden"
-              style={{ width: `${pos}%` }}
-            >
-              <img src={before} alt="Before" width={1024} height={1024}
-                   className="absolute inset-0 w-full h-full object-cover"
-                   style={{ width: `${100 * (100 / Math.max(pos, 0.0001))}%`, maxWidth: "none" }} />
+            <img
+              src={after}
+              alt="After"
+              width={1024}
+              height={1024}
+              className="absolute inset-0 w-full h-full object-cover bw-img"
+            />
+            <div className="absolute inset-0 overflow-hidden" style={{ width: `${pos}%` }}>
+              <img
+                src={before}
+                alt="Before"
+                width={1024}
+                height={1024}
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{ width: `${100 * (100 / Math.max(pos, 0.0001))}%`, maxWidth: "none" }}
+              />
             </div>
 
             <div
@@ -74,11 +88,14 @@ export function BeforeAfter() {
               <span className="serif text-paper text-xl leading-none">‹›</span>
             </div>
 
-            <span className="absolute top-4 left-4 mono text-[10px] tracking-[0.3em] uppercase text-paper mix-blend-difference">Before</span>
-            <span className="absolute top-4 right-4 mono text-[10px] tracking-[0.3em] uppercase text-paper mix-blend-difference">After</span>
+            <span className="absolute top-4 left-4 mono text-[10px] tracking-[0.3em] uppercase text-paper mix-blend-difference">
+              Before
+            </span>
+            <span className="absolute top-4 right-4 mono text-[10px] tracking-[0.3em] uppercase text-paper mix-blend-difference">
+              After
+            </span>
           </div>
         </div>
-
       </div>
     </section>
   );

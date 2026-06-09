@@ -9,11 +9,50 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsAndConditionsRouteImport } from './routes/terms-and-conditions'
+import { Route as RefundCancellationPolicyRouteImport } from './routes/refund-cancellation-policy'
+import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
+import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as CourseRouteImport } from './routes/course'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ReservePaymentRouteImport } from './routes/reserve/payment'
+import { Route as ReserveCompleteRouteImport } from './routes/reserve/complete'
 import { Route as ReservationRefRouteImport } from './routes/reservation.$ref'
 import { Route as PaymentRefRouteImport } from './routes/payment.$ref'
 
+const TermsAndConditionsRoute = TermsAndConditionsRouteImport.update({
+  id: '/terms-and-conditions',
+  path: '/terms-and-conditions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RefundCancellationPolicyRoute =
+  RefundCancellationPolicyRouteImport.update({
+    id: '/refund-cancellation-policy',
+    path: '/refund-cancellation-policy',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
+  id: '/privacy-policy',
+  path: '/privacy-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CourseRoute = CourseRouteImport.update({
+  id: '/course',
+  path: '/course',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -22,6 +61,16 @@ const AdminRoute = AdminRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReservePaymentRoute = ReservePaymentRouteImport.update({
+  id: '/reserve/payment',
+  path: '/reserve/payment',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReserveCompleteRoute = ReserveCompleteRouteImport.update({
+  id: '/reserve/complete',
+  path: '/reserve/complete',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReservationRefRoute = ReservationRefRouteImport.update({
@@ -38,39 +87,150 @@ const PaymentRefRoute = PaymentRefRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/contact': typeof ContactRoute
+  '/course': typeof CourseRoute
+  '/pricing': typeof PricingRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/refund-cancellation-policy': typeof RefundCancellationPolicyRoute
+  '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/payment/$ref': typeof PaymentRefRoute
   '/reservation/$ref': typeof ReservationRefRoute
+  '/reserve/complete': typeof ReserveCompleteRoute
+  '/reserve/payment': typeof ReservePaymentRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/contact': typeof ContactRoute
+  '/course': typeof CourseRoute
+  '/pricing': typeof PricingRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/refund-cancellation-policy': typeof RefundCancellationPolicyRoute
+  '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/payment/$ref': typeof PaymentRefRoute
   '/reservation/$ref': typeof ReservationRefRoute
+  '/reserve/complete': typeof ReserveCompleteRoute
+  '/reserve/payment': typeof ReservePaymentRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/contact': typeof ContactRoute
+  '/course': typeof CourseRoute
+  '/pricing': typeof PricingRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
+  '/refund-cancellation-policy': typeof RefundCancellationPolicyRoute
+  '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/payment/$ref': typeof PaymentRefRoute
   '/reservation/$ref': typeof ReservationRefRoute
+  '/reserve/complete': typeof ReserveCompleteRoute
+  '/reserve/payment': typeof ReservePaymentRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/payment/$ref' | '/reservation/$ref'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/contact'
+    | '/course'
+    | '/pricing'
+    | '/privacy-policy'
+    | '/refund-cancellation-policy'
+    | '/terms-and-conditions'
+    | '/payment/$ref'
+    | '/reservation/$ref'
+    | '/reserve/complete'
+    | '/reserve/payment'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/payment/$ref' | '/reservation/$ref'
-  id: '__root__' | '/' | '/admin' | '/payment/$ref' | '/reservation/$ref'
+  to:
+    | '/'
+    | '/admin'
+    | '/contact'
+    | '/course'
+    | '/pricing'
+    | '/privacy-policy'
+    | '/refund-cancellation-policy'
+    | '/terms-and-conditions'
+    | '/payment/$ref'
+    | '/reservation/$ref'
+    | '/reserve/complete'
+    | '/reserve/payment'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/contact'
+    | '/course'
+    | '/pricing'
+    | '/privacy-policy'
+    | '/refund-cancellation-policy'
+    | '/terms-and-conditions'
+    | '/payment/$ref'
+    | '/reservation/$ref'
+    | '/reserve/complete'
+    | '/reserve/payment'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  ContactRoute: typeof ContactRoute
+  CourseRoute: typeof CourseRoute
+  PricingRoute: typeof PricingRoute
+  PrivacyPolicyRoute: typeof PrivacyPolicyRoute
+  RefundCancellationPolicyRoute: typeof RefundCancellationPolicyRoute
+  TermsAndConditionsRoute: typeof TermsAndConditionsRoute
   PaymentRefRoute: typeof PaymentRefRoute
   ReservationRefRoute: typeof ReservationRefRoute
+  ReserveCompleteRoute: typeof ReserveCompleteRoute
+  ReservePaymentRoute: typeof ReservePaymentRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms-and-conditions': {
+      id: '/terms-and-conditions'
+      path: '/terms-and-conditions'
+      fullPath: '/terms-and-conditions'
+      preLoaderRoute: typeof TermsAndConditionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/refund-cancellation-policy': {
+      id: '/refund-cancellation-policy'
+      path: '/refund-cancellation-policy'
+      fullPath: '/refund-cancellation-policy'
+      preLoaderRoute: typeof RefundCancellationPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy-policy': {
+      id: '/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof PrivacyPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/course': {
+      id: '/course'
+      path: '/course'
+      fullPath: '/course'
+      preLoaderRoute: typeof CourseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -83,6 +243,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reserve/payment': {
+      id: '/reserve/payment'
+      path: '/reserve/payment'
+      fullPath: '/reserve/payment'
+      preLoaderRoute: typeof ReservePaymentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reserve/complete': {
+      id: '/reserve/complete'
+      path: '/reserve/complete'
+      fullPath: '/reserve/complete'
+      preLoaderRoute: typeof ReserveCompleteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reservation/$ref': {
@@ -105,9 +279,27 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  ContactRoute: ContactRoute,
+  CourseRoute: CourseRoute,
+  PricingRoute: PricingRoute,
+  PrivacyPolicyRoute: PrivacyPolicyRoute,
+  RefundCancellationPolicyRoute: RefundCancellationPolicyRoute,
+  TermsAndConditionsRoute: TermsAndConditionsRoute,
   PaymentRefRoute: PaymentRefRoute,
   ReservationRefRoute: ReservationRefRoute,
+  ReserveCompleteRoute: ReserveCompleteRoute,
+  ReservePaymentRoute: ReservePaymentRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

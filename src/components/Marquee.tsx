@@ -1,5 +1,14 @@
 export function Marquee() {
-  const words = ["See Differently", "—", "Frame the unseen", "—", "Light is the subject", "—", "Mobile, not amateur", "—"];
+  const words = [
+    "See Differently",
+    "—",
+    "Frame the unseen",
+    "—",
+    "Light is the subject",
+    "—",
+    "Mobile, not amateur",
+    "—",
+  ];
   const row = [...words, ...words, ...words];
   return (
     <section className="border-y border-ink/15 bg-paper overflow-hidden py-5 md:py-8">

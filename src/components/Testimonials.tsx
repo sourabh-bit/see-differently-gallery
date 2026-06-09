@@ -1,7 +1,19 @@
 const items = [
-  { quote: "I stopped chasing better gear after one afternoon with him.", name: "Lena V.", role: "Architect, Lisbon" },
-  { quote: "He didn't teach me photography. He taught me how to look.", name: "Marc D.", role: "Brand Director, Berlin" },
-  { quote: "The most valuable seven hours I've ever paid for.", name: "Aisha N.", role: "Independent Editor, Cairo" },
+  {
+    quote: "I stopped chasing better gear after one afternoon with him.",
+    name: "Lena V.",
+    role: "Architect, Lisbon",
+  },
+  {
+    quote: "He didn't teach me photography. He taught me how to look.",
+    name: "Marc D.",
+    role: "Brand Director, Berlin",
+  },
+  {
+    quote: "The most valuable seven hours I've ever paid for.",
+    name: "Aisha N.",
+    role: "Independent Editor, Cairo",
+  },
 ];
 
 export function Testimonials() {

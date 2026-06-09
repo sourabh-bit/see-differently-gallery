@@ -40,7 +40,7 @@ export function Cursor() {
 
   if (!enabled) return null;
 
-  const size = mode === "image" ? 96 : mode === "cta" ? 56 : 8;
+  const size = mode === "image" ? 48 : mode === "cta" ? 56 : 8;
 
   return (
     <>
@@ -56,18 +56,17 @@ export function Cursor() {
             x: -size / 2,
             y: -size / 2,
             borderWidth: mode === "default" ? 0 : 1,
-            backgroundColor:
-              mode === "default" ? "rgb(255,255,255)" : "transparent",
+            backgroundColor: mode === "default" ? "rgb(255,255,255)" : "transparent",
           }}
           transition={{ type: "spring", stiffness: 350, damping: 30 }}
           style={{ borderColor: "white", borderRadius: "9999px" }}
         >
           {mode === "image" && (
             <div className="relative w-full h-full">
-              <span className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1 h-2 w-px bg-white" />
-              <span className="absolute left-1/2 bottom-0 -translate-x-1/2 translate-y-1 h-2 w-px bg-white" />
-              <span className="absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1 w-2 h-px bg-white" />
-              <span className="absolute top-1/2 right-0 -translate-y-1/2 translate-x-1 w-2 h-px bg-white" />
+              <span className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1 h-1 w-px bg-white" />
+              <span className="absolute left-1/2 bottom-0 -translate-x-1/2 translate-y-1 h-1 w-px bg-white" />
+              <span className="absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1 w-1 h-px bg-white" />
+              <span className="absolute top-1/2 right-0 -translate-y-1/2 translate-x-1 w-1 h-px bg-white" />
             </div>
           )}
         </motion.div>

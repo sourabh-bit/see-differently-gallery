@@ -1,11 +1,9 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@300;400;500&display=swap");
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
-
-/* Fonts: Editorial serif + clean mono/sans */
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@300;400;500&display=swap");
 
 @theme inline {
   --radius-sm: 0px;
@@ -43,7 +41,7 @@
 }
 
 :root {
-  --background: oklch(0.985 0.002 80);   /* warm bone paper */
+  --background: oklch(0.985 0.002 80); /* warm bone paper */
   --paper: oklch(0.985 0.002 80);
   --bone: oklch(0.955 0.003 80);
   --ash: oklch(0.82 0.005 80);
@@ -69,19 +67,39 @@
 }
 
 @layer base {
-  * { border-color: var(--color-border); }
-  html, body { background: var(--color-paper); color: var(--color-ink); }
+  * {
+    border-color: var(--color-border);
+  }
+  html,
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+  }
   body {
     font-family: var(--font-sans);
     font-weight: 300;
     -webkit-font-smoothing: antialiased;
   }
   @media (pointer: fine) {
-    body { cursor: none; }
+    body {
+      cursor: none;
+    }
   }
-  ::selection { background: var(--color-ink); color: var(--color-paper); }
-  h1, h2, h3, .serif { font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.02em; }
-  .mono { font-family: var(--font-mono); }
+  ::selection {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  h1,
+  h2,
+  h3,
+  .serif {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+  }
+  .mono {
+    font-family: var(--font-mono);
+  }
 }
 
 /* Editorial utilities */
@@ -98,15 +116,29 @@
     mix-blend-mode: multiply;
     background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   }
-  .bw-img { filter: grayscale(1) contrast(1.05); }
-  .hairline { background: var(--color-ink); height: 1px; }
-  .v-hairline { background: var(--color-ink); width: 1px; }
-  .text-balance { text-wrap: balance; }
+  .bw-img {
+    filter: grayscale(1) contrast(1.05);
+  }
+  .hairline {
+    background: var(--color-ink);
+    height: 1px;
+  }
+  .v-hairline {
+    background: var(--color-ink);
+    width: 1px;
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
   .marquee-track {
     animation: marquee 40s linear infinite;
   }
   @keyframes marquee {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
   }
 }

@@ -7,25 +7,35 @@ import j4 from "@/assets/film-03.jpg";
 import j5 from "@/assets/film-06.jpg";
 
 const panels = [
-  { n: "I", word: "Observe", caption: "Before you raise the phone, raise your attention.", img: j1 },
-  { n: "II", word: "Compose", caption: "Geometry, weight, and what you choose to leave out.", img: j2 },
-  { n: "III", word: "Capture", caption: "The decisive half-second nobody else noticed.", img: j3 },
-  { n: "IV", word: "Edit", caption: "Subtraction is the most underrated camera setting.", img: j4 },
-  { n: "V", word: "Share", caption: "Sequence frames into something that lasts.", img: j5 },
+  {
+    n: "I",
+    word: "Observe",
+    caption: "Before you raise the phone, raise your attention.",
+    img: j1,
+  },
+  {
+    n: "II",
+    word: "Compose",
+    caption: "Geometry, weight, and what you choose to leave out.",
+    img: j2,
+  },
+  // { n: "III", word: "Capture", caption: "The decisive half-second nobody else noticed.", img: j3 },
+  // { n: "IV", word: "Edit", caption: "Subtraction is the most underrated camera setting.", img: j4 },
+  // { n: "V", word: "Share", caption: "Sequence frames into something that lasts.", img: j5 },
 ];
 
 export function Journey() {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
-  const x = useTransform(scrollYProgress, [0, 1], ["0%", "-80%"]);
+  const x = useTransform(scrollYProgress, [0, 1], ["0%", "-100%"]);
 
   return (
-    <section id="journey" ref={ref} className="relative h-[500vh] bg-paper">
+    <section id="journey" ref={ref} className="relative h-[300vh] bg-paper">
       <div className="sticky top-0 h-screen overflow-hidden">
-        <div className="absolute top-10 left-6 md:left-12 z-10 mono text-[11px] tracking-[0.3em] uppercase text-graphite flex items-center gap-4">
+        <div className="absolute top-25 left-6 md:left-12 z-10 mono text-[11px] tracking-[0.3em] uppercase text-graphite flex items-center gap-4">
           <span className="w-8 h-px bg-ink" /> 03 — The Journey
         </div>
-        <div className="absolute top-10 right-6 md:right-12 z-10 mono text-[11px] tracking-[0.3em] uppercase text-graphite">
+        <div className="absolute top-25 right-6 md:right-12 z-10 mono text-[11px] tracking-[0.3em] uppercase text-graphite">
           Scroll →
         </div>
 
@@ -45,7 +55,10 @@ export function Journey() {
                   Hour {i + 1} of 7
                 </div>
               </div>
-              <div className="col-span-12 md:col-span-6 md:col-start-7 h-[34vh] md:h-[70vh] overflow-hidden" data-cursor="image">
+              <div
+                className="col-span-12 md:col-span-6 md:col-start-7 h-[34vh] md:h-[70vh] overflow-hidden -mt-8 md:mt-0"
+                data-cursor="image"
+              >
                 <img
                   src={p.img}
                   alt={p.word}

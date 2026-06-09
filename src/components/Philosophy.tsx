@@ -3,9 +3,21 @@ import { useRef } from "react";
 
 const QUOTE = "Photography isn't about equipment. It's about attention.";
 
-function Word({ progress, range, children }: { progress: MotionValue<number>; range: [number, number]; children: string }) {
+function Word({
+  progress,
+  range,
+  children,
+}: {
+  progress: MotionValue<number>;
+  range: [number, number];
+  children: string;
+}) {
   const opacity = useTransform(progress, range, [0.15, 1]);
-  return <motion.span style={{ opacity }} className="inline-block mr-[0.25em]">{children}</motion.span>;
+  return (
+    <motion.span style={{ opacity }} className="inline-block mr-[0.25em]">
+      {children}
+    </motion.span>
+  );
 }
 
 export function Philosophy() {
@@ -20,11 +32,18 @@ export function Philosophy() {
           <span className="w-6 md:w-8 h-px bg-ink" /> 01 — The Philosophy
         </div>
 
-        <div ref={ref} className="serif text-[9vw] md:text-[5vw] leading-[1.05] tracking-[-0.02em] text-balance">
+        <div
+          ref={ref}
+          className="serif text-[9vw] md:text-[5vw] leading-[1.05] tracking-[-0.02em] text-balance"
+        >
           {words.map((w, i) => {
             const start = i / words.length;
             const end = start + 1 / words.length;
-            return <Word key={i} progress={scrollYProgress} range={[start, end]}>{w}</Word>;
+            return (
+              <Word key={i} progress={scrollYProgress} range={[start, end]}>
+                {w}
+              </Word>
+            );
           })}
         </div>
 
@@ -38,8 +57,12 @@ export function Philosophy() {
             </p>
           </div>
           <div className="md:col-span-3 md:col-start-9 md:text-right">
-            <div className="mono text-[10px] tracking-[0.3em] uppercase text-graphite">— R. Ardon</div>
-            <div className="mono text-[10px] tracking-[0.3em] uppercase text-graphite">Photographer · Mentor</div>
+            <div className="mono text-[10px] tracking-[0.3em] uppercase text-graphite">
+              — R. Ardon
+            </div>
+            <div className="mono text-[10px] tracking-[0.3em] uppercase text-graphite">
+              Photographer · Mentor
+            </div>
           </div>
         </div>
       </div>
