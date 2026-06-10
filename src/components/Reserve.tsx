@@ -1,49 +1,50 @@
-import { useState, type FormEvent } from "react";
 import { motion } from "framer-motion";
+import { useServerFn } from "@tanstack/react-start";
+import { useState, type FormEvent } from "react";
+
+import { createReservation } from "@/lib/reservations.functions";
 
 const WORKSHOP_PRICE = 10000;
 const SEATS_LEFT = 4;
 
-type ReservationDraft = {
-  name: string;
-  email: string;
-  whatsapp: string;
-  notes: string;
-};
-
-function saveReservationDraft(draft: ReservationDraft) {
+function safeSetSessionItem(key: string, value: string) {
   try {
-    sessionStorage.setItem("seen-reservation-draft", JSON.stringify(draft));
-    return true;
+    sessionStorage.setItem(key, value);
   } catch {
-    return false;
+    // Ignore browser storage restrictions.
   }
 }
 
 export function Reserve() {
+  const createReservationFn = useServerFn(createReservation);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [notes, setNotes] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSubmitting(true);
 
-    const draft: ReservationDraft = {
+    const draft = {
       name: name.trim(),
       email: email.trim(),
       whatsapp: phone.trim(),
       notes: notes.trim(),
     };
 
-    if (!saveReservationDraft(draft)) {
-      setError("We could not save your reservation details in this browser. Please try again.");
-      return;
+    try {
+      const reservation = await createReservationFn({ data: draft });
+      safeSetSessionItem("seen-reservation-draft", JSON.stringify(draft));
+      safeSetSessionItem("seen-reservation-ref", reservation.ref);
+      window.location.assign("/reserve/payment");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not reserve. Try again.");
+      setSubmitting(false);
     }
-
-    window.location.assign("/reserve/payment");
   };
 
   return (
@@ -63,8 +64,8 @@ export function Reserve() {
               <span className="text-paper">Rs {WORKSHOP_PRICE.toLocaleString()}</span>.
             </p>
             <p className="text-paper/60 text-sm md:text-base">
-              Fill your details, then continue to the payment page for Razorpay Checkout and
-              automatic verification.
+              Reserve your seat, then continue to Razorpay checkout for instant payment
+              verification.
             </p>
           </div>
         </div>
@@ -117,7 +118,7 @@ export function Reserve() {
                 Mobile Photography <span className="italic">Masterclass</span>
               </div>
               <p className="mt-3 md:mt-4 text-graphite max-w-md text-sm md:text-base">
-                Enter your details to continue to the Razorpay payment page.
+                Enter your details to reserve a seat, then continue to the Razorpay payment page.
               </p>
 
               <form onSubmit={onSubmit} className="mt-8 md:mt-10 grid gap-6 md:gap-8">
@@ -180,10 +181,11 @@ export function Reserve() {
                 <button
                   type="submit"
                   data-cursor="cta"
-                  className="group mt-2 inline-flex items-center justify-between gap-6 bg-ink text-paper px-8 py-6 hover:bg-graphite transition-colors w-full md:w-auto"
+                  disabled={submitting}
+                  className="group mt-2 inline-flex items-center justify-between gap-6 bg-ink text-paper px-8 py-6 hover:bg-graphite transition-colors w-full md:w-auto disabled:opacity-60"
                 >
                   <span className="mono text-[11px] tracking-[0.4em] uppercase">
-                    Continue to Payment
+                    {submitting ? "Holding seat..." : "Continue to Payment"}
                   </span>
                   <span className="serif text-3xl leading-none transition-transform group-hover:translate-x-2">
                     -&gt;

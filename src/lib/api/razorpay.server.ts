@@ -11,6 +11,7 @@ export type ReservationDraft = {
 export type RazorpayOrderInput = ReservationDraft & {
   amount: number;
   currency: string;
+  reservationRef?: string;
 };
 
 export type RazorpayOrderRecord = {
@@ -91,7 +92,7 @@ async function readRazorpayOrderResponse(orderId: string) {
 export async function createRazorpayOrder(input: RazorpayOrderInput) {
   const { keyId, keySecret } = getRazorpayConfig();
   const auth = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
-  const receipt = buildReceipt();
+  const receipt = input.reservationRef ? `seen-${input.reservationRef}` : buildReceipt();
 
   const response = await fetch("https://api.razorpay.com/v1/orders", {
     method: "POST",
@@ -108,6 +109,7 @@ export async function createRazorpayOrder(input: RazorpayOrderInput) {
         student_email: trimNotes(input.email),
         student_whatsapp: trimNotes(input.whatsapp),
         student_notes: trimNotes(input.notes || "None"),
+        ...(input.reservationRef ? { reservation_ref: trimNotes(input.reservationRef) } : {}),
       },
     }),
   });
@@ -146,6 +148,40 @@ export async function createRazorpayOrder(input: RazorpayOrderInput) {
 
 export async function fetchRazorpayOrder(orderId: string) {
   return readRazorpayOrderResponse(orderId);
+}
+
+export async function refundRazorpayPayment(
+  paymentId: string,
+  amount?: number,
+  reason?: string,
+) {
+  const { keyId, keySecret } = getRazorpayConfig();
+  const auth = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
+
+  const response = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}/refund`, {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${auth}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      ...(amount ? { amount } : {}),
+      ...(reason ? { notes: { reason: trimNotes(reason) } } : {}),
+    }),
+  });
+
+  const text = await response.text();
+  if (!response.ok) {
+    throw new Error(`Razorpay refund failed: ${text}`);
+  }
+
+  const refund = JSON.parse(text) as { id?: string; status?: string };
+
+  if (!refund.id) {
+    throw new Error("Razorpay did not return a refund record.");
+  }
+
+  return refund;
 }
 
 export function verifyRazorpaySignature(

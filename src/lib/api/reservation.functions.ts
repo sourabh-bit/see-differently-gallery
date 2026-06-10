@@ -13,6 +13,7 @@ const reservationInput = z.object({
   email: z.string().email().max(160),
   whatsapp: z.string().min(6).max(40),
   notes: z.string().max(500).optional().or(z.literal("")),
+  reservationRef: z.string().min(4).max(40).optional(),
 });
 
 type ReservationCheckoutResponse = {

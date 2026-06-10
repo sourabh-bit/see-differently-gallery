@@ -19,8 +19,6 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ReservePaymentRouteImport } from './routes/reserve/payment'
 import { Route as ReserveCompleteRouteImport } from './routes/reserve/complete'
-import { Route as ReservationRefRouteImport } from './routes/reservation.$ref'
-import { Route as PaymentRefRouteImport } from './routes/payment.$ref'
 
 const TermsAndConditionsRoute = TermsAndConditionsRouteImport.update({
   id: '/terms-and-conditions',
@@ -73,16 +71,6 @@ const ReserveCompleteRoute = ReserveCompleteRouteImport.update({
   path: '/reserve/complete',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ReservationRefRoute = ReservationRefRouteImport.update({
-  id: '/reservation/$ref',
-  path: '/reservation/$ref',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PaymentRefRoute = PaymentRefRouteImport.update({
-  id: '/payment/$ref',
-  path: '/payment/$ref',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -93,8 +81,6 @@ export interface FileRoutesByFullPath {
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/refund-cancellation-policy': typeof RefundCancellationPolicyRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
-  '/payment/$ref': typeof PaymentRefRoute
-  '/reservation/$ref': typeof ReservationRefRoute
   '/reserve/complete': typeof ReserveCompleteRoute
   '/reserve/payment': typeof ReservePaymentRoute
 }
@@ -107,8 +93,6 @@ export interface FileRoutesByTo {
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/refund-cancellation-policy': typeof RefundCancellationPolicyRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
-  '/payment/$ref': typeof PaymentRefRoute
-  '/reservation/$ref': typeof ReservationRefRoute
   '/reserve/complete': typeof ReserveCompleteRoute
   '/reserve/payment': typeof ReservePaymentRoute
 }
@@ -122,8 +106,6 @@ export interface FileRoutesById {
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/refund-cancellation-policy': typeof RefundCancellationPolicyRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
-  '/payment/$ref': typeof PaymentRefRoute
-  '/reservation/$ref': typeof ReservationRefRoute
   '/reserve/complete': typeof ReserveCompleteRoute
   '/reserve/payment': typeof ReservePaymentRoute
 }
@@ -138,8 +120,6 @@ export interface FileRouteTypes {
     | '/privacy-policy'
     | '/refund-cancellation-policy'
     | '/terms-and-conditions'
-    | '/payment/$ref'
-    | '/reservation/$ref'
     | '/reserve/complete'
     | '/reserve/payment'
   fileRoutesByTo: FileRoutesByTo
@@ -152,8 +132,6 @@ export interface FileRouteTypes {
     | '/privacy-policy'
     | '/refund-cancellation-policy'
     | '/terms-and-conditions'
-    | '/payment/$ref'
-    | '/reservation/$ref'
     | '/reserve/complete'
     | '/reserve/payment'
   id:
@@ -166,8 +144,6 @@ export interface FileRouteTypes {
     | '/privacy-policy'
     | '/refund-cancellation-policy'
     | '/terms-and-conditions'
-    | '/payment/$ref'
-    | '/reservation/$ref'
     | '/reserve/complete'
     | '/reserve/payment'
   fileRoutesById: FileRoutesById
@@ -181,8 +157,6 @@ export interface RootRouteChildren {
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
   RefundCancellationPolicyRoute: typeof RefundCancellationPolicyRoute
   TermsAndConditionsRoute: typeof TermsAndConditionsRoute
-  PaymentRefRoute: typeof PaymentRefRoute
-  ReservationRefRoute: typeof ReservationRefRoute
   ReserveCompleteRoute: typeof ReserveCompleteRoute
   ReservePaymentRoute: typeof ReservePaymentRoute
 }
@@ -259,20 +233,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReserveCompleteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/reservation/$ref': {
-      id: '/reservation/$ref'
-      path: '/reservation/$ref'
-      fullPath: '/reservation/$ref'
-      preLoaderRoute: typeof ReservationRefRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/payment/$ref': {
-      id: '/payment/$ref'
-      path: '/payment/$ref'
-      fullPath: '/payment/$ref'
-      preLoaderRoute: typeof PaymentRefRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -285,8 +245,6 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyPolicyRoute: PrivacyPolicyRoute,
   RefundCancellationPolicyRoute: RefundCancellationPolicyRoute,
   TermsAndConditionsRoute: TermsAndConditionsRoute,
-  PaymentRefRoute: PaymentRefRoute,
-  ReservationRefRoute: ReservationRefRoute,
   ReserveCompleteRoute: ReserveCompleteRoute,
   ReservePaymentRoute: ReservePaymentRoute,
 }

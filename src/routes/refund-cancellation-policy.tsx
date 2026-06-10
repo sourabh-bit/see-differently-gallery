@@ -26,8 +26,8 @@ function RefundPolicyPage() {
         <p>
           Refunds and cancellations are reviewed based on the timing of the request and the stage of
           the booking. If you contact us before the live class starts, we will review your case and
-          determine whether a refund or cancellation can be approved under the circumstances. We
-          encourage you to reach out early if you think you may need to change your plans.
+          process the request where appropriate under the circumstances. We encourage you to reach
+          out early if you think you may need to change your plans.
         </p>
         <p>
           Once the live session has begun, refunds are generally not available because the seat has
@@ -36,7 +36,7 @@ function RefundPolicyPage() {
           and cannot easily be reassigned after the session is underway.
         </p>
         <p>
-          If a refund is approved, it will typically be returned through the original payment method
+          If a refund is issued, it will typically be returned through the original payment method
           used at checkout, subject to the processing times of the payment provider and the banking
           network. We do not control the exact speed of the return once the refund has been
           initiated, so some delay may occur before the funds appear in your account.

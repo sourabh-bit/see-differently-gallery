@@ -14,7 +14,7 @@ export type Database = {
   }
   public: {
     Tables: {
-      reservations: {
+        reservations: {
         Row: {
           amount_paise: number
           claimed_paid_at: string | null
@@ -23,10 +23,18 @@ export type Database = {
           email: string
           id: string
           name: string
+          notes: string | null
           payment_note: string | null
+          payment_id: string | null
+          payment_order_id: string | null
+          payment_signature: string | null
+          payment_status: string
           phone: string
           ref: string
+          refunded_at: string | null
+          refund_reason: string | null
           status: string
+          paid_at: string | null
           updated_at: string
         }
         Insert: {
@@ -37,10 +45,18 @@ export type Database = {
           email: string
           id?: string
           name: string
+          notes?: string | null
           payment_note?: string | null
+          payment_id?: string | null
+          payment_order_id?: string | null
+          payment_signature?: string | null
+          payment_status?: string
           phone: string
           ref: string
+          refunded_at?: string | null
+          refund_reason?: string | null
           status?: string
+          paid_at?: string | null
           updated_at?: string
         }
         Update: {
@@ -51,10 +67,18 @@ export type Database = {
           email?: string
           id?: string
           name?: string
+          notes?: string | null
           payment_note?: string | null
+          payment_id?: string | null
+          payment_order_id?: string | null
+          payment_signature?: string | null
+          payment_status?: string
           phone?: string
           ref?: string
+          refunded_at?: string | null
+          refund_reason?: string | null
           status?: string
+          paid_at?: string | null
           updated_at?: string
         }
         Relationships: []

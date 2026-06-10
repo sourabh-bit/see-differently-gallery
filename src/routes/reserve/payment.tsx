@@ -1,10 +1,12 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
+import { createReservation, markReservationPaid } from "@/lib/reservations.functions";
 import {
   createReservationCheckout,
   verifyReservationPayment,
 } from "@/lib/api/reservation.functions";
+import { useServerFn } from "@tanstack/react-start";
 
 type ReservationDraft = {
   name: string;
@@ -29,6 +31,7 @@ type RazorpaySummary = {
   amount: number;
   currency: string;
   receipt: string;
+  reservationRef: string;
 };
 
 type RazorpayCheckoutOptions = {
@@ -118,13 +121,23 @@ function loadRazorpayCheckoutScript() {
 }
 
 function PaymentPage() {
+  const createCheckout = useServerFn(createReservationCheckout);
+  const markPaid = useServerFn(markReservationPaid);
+  const createReservationFn = useServerFn(createReservation);
   const [draft, setDraft] = useState<ReservationDraft | null>(null);
+  const [reservationRef, setReservationRef] = useState<string | null>(null);
   const [hasLoadedDraft, setHasLoadedDraft] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     const raw = safeGetSessionItem("seen-reservation-draft");
+    const ref = safeGetSessionItem("seen-reservation-ref");
+
+    if (ref) {
+      setReservationRef(ref);
+    }
+
     if (!raw) {
       setHasLoadedDraft(true);
       return;
@@ -158,11 +171,25 @@ function PaymentPage() {
       return;
     }
 
+    let ref = reservationRef ?? safeGetSessionItem("seen-reservation-ref");
+
     setErrorMessage("");
     setIsProcessing(true);
 
     try {
-      const checkout = await createReservationCheckout({ data: draft });
+      if (!ref) {
+        const reservation = await createReservationFn({ data: draft });
+        ref = reservation.ref;
+        safeSetSessionItem("seen-reservation-ref", ref);
+      }
+
+      const checkout = await createCheckout({
+        data: {
+          ...draft,
+          reservationRef: ref,
+        },
+      });
+
       await loadRazorpayCheckoutScript();
 
       if (!window.Razorpay) {
@@ -186,6 +213,7 @@ function PaymentPage() {
           student_email: draft.email,
           student_whatsapp: draft.whatsapp,
           student_notes: draft.notes || "None",
+          reservation_ref: ref,
           receipt: checkout.receipt,
         },
         theme: {
@@ -204,16 +232,27 @@ function PaymentPage() {
               },
             });
 
+            await markPaid({
+              data: {
+                ref,
+                orderId: checkout.orderId,
+                paymentId: response.razorpay_payment_id,
+                signature: response.razorpay_signature,
+              },
+            });
+
             const paymentSummary: RazorpaySummary = {
               orderId: checkout.orderId,
               paymentId: response.razorpay_payment_id,
               amount: verification.amount,
               currency: verification.currency,
               receipt: verification.receipt ?? checkout.receipt,
+              reservationRef: ref,
             };
 
             safeSetSessionItem("seen-razorpay-payment", JSON.stringify(paymentSummary));
             safeRemoveSessionItem("seen-reservation-draft");
+            safeRemoveSessionItem("seen-reservation-ref");
             window.location.replace("/reserve/complete");
           } catch (verificationError) {
             setErrorMessage(
@@ -244,7 +283,7 @@ function PaymentPage() {
             className="inline-flex items-center gap-2 text-paper/60 transition-colors hover:text-paper"
           >
             <span aria-hidden className="text-lg leading-none">
-              ←
+              &larr;
             </span>
             <span className="mono text-[10px] tracking-[0.3em] uppercase">Home</span>
           </Link>
@@ -271,7 +310,7 @@ function PaymentPage() {
             className="inline-flex items-center gap-2 text-paper/60 transition-colors hover:text-paper"
           >
             <span aria-hidden className="text-lg leading-none">
-              ←
+              &larr;
             </span>
             <span className="mono text-[10px] tracking-[0.3em] uppercase">Home</span>
           </Link>
@@ -296,9 +335,9 @@ function PaymentPage() {
           to="/"
           className="inline-flex items-center gap-2 text-paper/60 transition-colors hover:text-paper"
         >
-          <span aria-hidden className="text-lg leading-none">
-            ←
-          </span>
+            <span aria-hidden className="text-lg leading-none">
+              &larr;
+            </span>
           <span className="mono text-[10px] tracking-[0.3em] uppercase">Home</span>
         </Link>
       </div>

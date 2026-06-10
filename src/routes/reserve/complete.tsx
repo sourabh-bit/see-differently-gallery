@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 type PaymentSummary = {
@@ -7,6 +7,7 @@ type PaymentSummary = {
   amount: number;
   currency: string;
   receipt: string;
+  reservationRef: string;
 };
 
 export const Route = createFileRoute("/reserve/complete")({
@@ -41,7 +42,7 @@ function ReserveCompletePage() {
           className="inline-flex items-center gap-2 text-paper/60 transition-colors hover:text-paper"
         >
           <span aria-hidden className="text-lg leading-none">
-            ←
+            &larr;
           </span>
           <span className="mono text-[10px] tracking-[0.3em] uppercase">Home</span>
         </Link>
@@ -77,6 +78,9 @@ function ReserveCompletePage() {
                 Payment reference
               </div>
               <div className="space-y-3 text-sm md:text-base text-paper/80">
+                <div>
+                  <span className="text-paper/45">Reservation ref:</span> {payment.reservationRef}
+                </div>
                 <div>
                   <span className="text-paper/45">Payment ID:</span> {payment.paymentId}
                 </div>
