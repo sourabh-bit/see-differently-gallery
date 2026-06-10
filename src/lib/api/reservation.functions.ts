@@ -26,7 +26,7 @@ type ReservationCheckoutResponse = {
 };
 
 export const createReservationCheckout = createServerFn({ method: "POST" })
-  .inputValidator(reservationInput)
+  .validator(reservationInput)
   .handler(async ({ data }): Promise<ReservationCheckoutResponse> => {
     const config = getRazorpayConfig();
     const order = await createRazorpayOrder({
@@ -61,7 +61,7 @@ type VerifyReservationPaymentResponse = {
 };
 
 export const verifyReservationPayment = createServerFn({ method: "POST" })
-  .inputValidator(verifyReservationInput)
+  .validator(verifyReservationInput)
   .handler(async ({ data }): Promise<VerifyReservationPaymentResponse> => {
     const { keySecret, amount: expectedAmount, currency: expectedCurrency } = getRazorpayConfig();
     const verified = verifyRazorpaySignature(

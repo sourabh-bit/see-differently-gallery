@@ -224,11 +224,22 @@ function PaymentPage() {
         },
         handler: async (response) => {
           try {
+            if (!response.razorpay_payment_id || !response.razorpay_signature) {
+              throw new Error("Missing Razorpay payment details.");
+            }
+            if (!ref) {
+              throw new Error("Missing reservation reference.");
+            }
+
+            const paymentId = response.razorpay_payment_id;
+            const signature = response.razorpay_signature;
+            const reservationRef = ref;
+
             const verification = await verifyReservationPayment({
               data: {
                 orderId: checkout.orderId,
-                paymentId: response.razorpay_payment_id,
-                signature: response.razorpay_signature,
+                paymentId,
+                signature,
               },
             });
 
@@ -236,18 +247,21 @@ function PaymentPage() {
               data: {
                 ref,
                 orderId: checkout.orderId,
-                paymentId: response.razorpay_payment_id,
-                signature: response.razorpay_signature,
+                paymentId,
+                signature,
               },
             });
 
+            const receipt = verification.receipt ?? checkout.receipt ?? "";
+            const currency = verification.currency ?? checkout.currency ?? "INR";
+
             const paymentSummary: RazorpaySummary = {
               orderId: checkout.orderId,
-              paymentId: response.razorpay_payment_id,
+              paymentId,
               amount: verification.amount,
-              currency: verification.currency,
-              receipt: verification.receipt ?? checkout.receipt,
-              reservationRef: ref,
+              currency,
+              receipt,
+              reservationRef,
             };
 
             safeSetSessionItem("seen-razorpay-payment", JSON.stringify(paymentSummary));

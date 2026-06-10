@@ -20,7 +20,7 @@ const reservationSchema = z.object({
 });
 
 export const createReservation = createServerFn({ method: "POST" })
-  .inputValidator((data) => reservationSchema.parse(data))
+  .validator(reservationSchema)
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const ref = shortRef();
@@ -40,15 +40,13 @@ export const createReservation = createServerFn({ method: "POST" })
   });
 
 export const markReservationPaid = createServerFn({ method: "POST" })
-  .inputValidator((data) =>
-    z
-      .object({
-        ref: z.string().min(4).max(40),
-        orderId: z.string().min(5),
-        paymentId: z.string().min(5),
-        signature: z.string().min(10),
-      })
-      .parse(data),
+  .validator(
+    z.object({
+      ref: z.string().min(4).max(40),
+      orderId: z.string().min(5),
+      paymentId: z.string().min(5),
+      signature: z.string().min(10),
+    }),
   )
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -70,13 +68,11 @@ export const markReservationPaid = createServerFn({ method: "POST" })
   });
 
 export const adminList = createServerFn({ method: "POST" })
-  .inputValidator((data) =>
-    z
-      .object({
-        passcode: z.string().min(1).max(200),
-        filter: z.enum(["all", "pending", "paid", "refunded"]).default("all"),
-      })
-      .parse(data),
+  .validator(
+    z.object({
+      passcode: z.string().min(1).max(200),
+      filter: z.enum(["all", "pending", "paid", "refunded"]).default("all"),
+    }),
   )
   .handler(async ({ data }) => {
     if (data.passcode !== process.env.ADMIN_PASSCODE) {
@@ -102,14 +98,12 @@ export const adminList = createServerFn({ method: "POST" })
   });
 
 export const adminRefund = createServerFn({ method: "POST" })
-  .inputValidator((data) =>
-    z
-      .object({
-        passcode: z.string().min(1).max(200),
-        ref: z.string().min(4).max(40),
-        reason: z.string().trim().max(400).optional(),
-      })
-      .parse(data),
+  .validator(
+    z.object({
+      passcode: z.string().min(1).max(200),
+      ref: z.string().min(4).max(40),
+      reason: z.string().trim().max(400).optional(),
+    }),
   )
   .handler(async ({ data }) => {
     if (data.passcode !== process.env.ADMIN_PASSCODE) {
