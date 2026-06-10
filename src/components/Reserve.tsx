@@ -6,6 +6,7 @@ import { createReservation } from "@/lib/reservations.functions";
 
 const WORKSHOP_PRICE = 10000;
 const SEATS_LEFT = 4;
+const SERVER_FN_TIMEOUT_MS = 20_000;
 
 function safeSetSessionItem(key: string, value: string) {
   try {
@@ -13,6 +14,17 @@ function safeSetSessionItem(key: string, value: string) {
   } catch {
     // Ignore browser storage restrictions.
   }
+}
+
+function withTimeout<T>(promise: Promise<T>, label: string, timeoutMs = SERVER_FN_TIMEOUT_MS) {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      window.setTimeout(() => {
+        reject(new Error(`${label} took too long. Please try again.`));
+      }, timeoutMs);
+    }),
+  ]);
 }
 
 export function Reserve() {
@@ -37,7 +49,10 @@ export function Reserve() {
     };
 
     try {
-      const reservation = await createReservationFn({ data: draft });
+      const reservation = await withTimeout(
+        createReservationFn({ data: draft }),
+        "Saving your reservation",
+      );
       safeSetSessionItem("seen-reservation-draft", JSON.stringify(draft));
       safeSetSessionItem("seen-reservation-ref", reservation.ref);
       window.location.assign("/reserve/payment");

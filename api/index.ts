@@ -24,8 +24,8 @@ export default async function handler(req: VercelNodeRequest, res: VercelNodeRes
   const origin = `https://${req.headers.host ?? "localhost"}`;
   const requestUrl = new URL(req.url ?? "/", origin);
   const hasBody = req.method != null && !["GET", "HEAD"].includes(req.method);
-  const body = hasBody
-    ? (Readable.toWeb(req as unknown as NodeJS.ReadableStream) as unknown as BodyInit)
+  const body: BodyInit | undefined = hasBody
+    ? (Readable.toWeb(req as unknown as NodeJS.ReadableStream) as any)
     : undefined;
 
   const response = await renderRequest(
@@ -40,7 +40,7 @@ export default async function handler(req: VercelNodeRequest, res: VercelNodeRes
   res.statusCode = response.status;
   res.statusMessage = response.statusText;
 
-  for (const [key, value] of response.headers.entries()) {
+  for (const [key, value] of Array.from(response.headers.entries()) as Array<[string, string]>) {
     res.setHeader(key, value);
   }
 

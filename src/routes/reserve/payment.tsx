@@ -19,6 +19,8 @@ const WORKSHOP_PRICE = 10000;
 const CHECKOUT_SCRIPT_SRC = "https://checkout.razorpay.com/v1/checkout.js";
 const RESERVE_FORM_URL = "/#reserve";
 const REDIRECT_DELAY_MS = 1200;
+const SERVER_FN_TIMEOUT_MS = 20_000;
+const SCRIPT_TIMEOUT_MS = 20_000;
 
 type RazorpaySuccess = {
   razorpay_payment_id: string;
@@ -86,6 +88,17 @@ function safeRemoveSessionItem(key: string) {
   }
 }
 
+function withTimeout<T>(promise: Promise<T>, label: string, timeoutMs = SERVER_FN_TIMEOUT_MS) {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      window.setTimeout(() => {
+        reject(new Error(`${label} took too long. Please try again.`));
+      }, timeoutMs);
+    }),
+  ]);
+}
+
 export const Route = createFileRoute("/reserve/payment")({
   component: PaymentPage,
 });
@@ -108,6 +121,10 @@ function loadRazorpayCheckoutScript() {
         () => reject(new Error("Unable to load Razorpay Checkout.")),
         { once: true },
       );
+      window.setTimeout(
+        () => reject(new Error("Razorpay Checkout took too long to load.")),
+        SCRIPT_TIMEOUT_MS,
+      );
       return;
     }
 
@@ -117,6 +134,10 @@ function loadRazorpayCheckoutScript() {
     script.onload = () => resolve();
     script.onerror = () => reject(new Error("Unable to load Razorpay Checkout."));
     document.body.appendChild(script);
+    window.setTimeout(
+      () => reject(new Error("Razorpay Checkout took too long to load.")),
+      SCRIPT_TIMEOUT_MS,
+    );
   });
 }
 
@@ -178,17 +199,23 @@ function PaymentPage() {
 
     try {
       if (!ref) {
-        const reservation = await createReservationFn({ data: draft });
+        const reservation = await withTimeout(
+          createReservationFn({ data: draft }),
+          "Saving your reservation",
+        );
         ref = reservation.ref;
         safeSetSessionItem("seen-reservation-ref", ref);
       }
 
-      const checkout = await createCheckout({
-        data: {
-          ...draft,
-          reservationRef: ref,
-        },
-      });
+      const checkout = await withTimeout(
+        createCheckout({
+          data: {
+            ...draft,
+            reservationRef: ref,
+          },
+        }),
+        "Preparing Razorpay checkout",
+      );
 
       await loadRazorpayCheckoutScript();
 
