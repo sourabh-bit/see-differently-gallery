@@ -4,7 +4,7 @@ export default defineConfig({
   preset: "vercel",
   vercel: {
     functions: {
-      runtime: "nodejs20.x",
+      runtime: "nodejs22.x",
     },
   },
 });
