@@ -24,27 +24,35 @@ export default async function handler(req: VercelNodeRequest, res: VercelNodeRes
   const origin = `https://${req.headers.host ?? "localhost"}`;
   const requestUrl = new URL(req.url ?? "/", origin);
   const hasBody = req.method != null && !["GET", "HEAD"].includes(req.method);
-  const headers: HeadersInit = Object.entries(req.headers).flatMap(([key, value]) => {
-    if (value == null) return [];
-    return Array.isArray(value) ? value.map((item) => [key, item] as [string, string]) : [[key, value] as [string, string]];
-  });
-  const body = hasBody
-    ? (Readable.toWeb(req as unknown as NodeJS.ReadableStream) as unknown as BodyInit)
-    : undefined;
+  const headers = new Headers();
 
-  const requestInit: RequestInit & { duplex?: "half" } = {
+  for (const [key, value] of Object.entries(req.headers)) {
+    if (value == null) continue;
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        headers.append(key, item);
+      }
+      continue;
+    }
+
+    headers.append(key, value);
+  }
+
+  const body = hasBody ? Readable.toWeb(req as unknown as NodeJS.ReadableStream) : undefined;
+
+  const requestInit = {
     method: req.method ?? "GET",
     headers,
     body: body ?? undefined,
     duplex: hasBody ? "half" : undefined,
-  };
+  } as RequestInit & { duplex?: "half" };
 
-  const response = await renderRequest(new Request(requestUrl, requestInit));
+  const response = await renderRequest(new Request(requestUrl, requestInit as any));
 
   res.statusCode = response.status;
   res.statusMessage = response.statusText;
 
-  for (const [key, value] of response.headers.entries() as IterableIterator<[string, string]>) {
+  for (const [key, value] of response.headers.entries()) {
     res.setHeader(key, value);
   }
 
