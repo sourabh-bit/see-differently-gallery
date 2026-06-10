@@ -24,12 +24,14 @@ export default async function handler(req: VercelNodeRequest, res: VercelNodeRes
   const origin = `https://${req.headers.host ?? "localhost"}`;
   const requestUrl = new URL(req.url ?? "/", origin);
   const hasBody = req.method != null && !["GET", "HEAD"].includes(req.method);
-  const body = hasBody ? Readable.toWeb(req as unknown as NodeJS.ReadableStream) : undefined;
+  const body = hasBody
+    ? (Readable.toWeb(req as unknown as NodeJS.ReadableStream) as ReadableStream<Uint8Array>)
+    : undefined;
 
   const response = await renderRequest(
     new Request(requestUrl, {
       method: req.method ?? "GET",
-      headers: req.headers,
+      headers: new Headers(req.headers as HeadersInit),
       body,
       duplex: hasBody ? "half" : undefined,
     }),
@@ -38,7 +40,7 @@ export default async function handler(req: VercelNodeRequest, res: VercelNodeRes
   res.statusCode = response.status;
   res.statusMessage = response.statusText;
 
-  response.headers.forEach((value, key) => {
+  response.headers.forEach((value: string, key: string) => {
     res.setHeader(key, value);
   });
 
