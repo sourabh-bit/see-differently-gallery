@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "functions": {
+    "api/index.ts": {
+      "runtime": "nodejs22.x"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/assets/(.*)",
+      "destination": "/client/assets/$1"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/api/index"
+    }
+  ]
+}
