@@ -2,34 +2,45 @@
 // Server-side Supabase client with service role key - bypasses RLS.
 // Use this for admin operations in server functions and server routes only.
 // For user-authenticated queries (with RLS), use the auth middleware instead.
-import { createClient } from '@supabase/supabase-js';
-import WebSocket from 'ws';
-import type { Database } from './types';
+import { createClient } from "@supabase/supabase-js";
+import type { Database } from "./types";
+import { assertRequiredEnv, createTimedFetch } from "@/lib/server-observability";
+
+const SUPABASE_REQUEST_TIMEOUT_MS = 10_000;
+
+const supabaseServerEnv = assertRequiredEnv(
+  "SupabaseAdmin",
+  {
+    SUPABASE_URL: process.env.SUPABASE_URL,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+  },
+  ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"],
+);
 
 function createSupabaseAdminClient() {
-  const SUPABASE_URL = process.env.SUPABASE_URL;
-  const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-    const missing = [
-      ...(!SUPABASE_URL ? ['SUPABASE_URL'] : []),
-      ...(!SUPABASE_SERVICE_ROLE_KEY ? ['SUPABASE_SERVICE_ROLE_KEY'] : []),
-    ];
-    const message = `Missing Supabase environment variable(s): ${missing.join(', ')}. Connect Supabase in Lovable Cloud.`;
-    console.error(`[Supabase] ${message}`);
-    throw new Error(message);
-  }
-
-  return createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-    realtime: {
-      transport: WebSocket as any,
-    },
-    auth: {
-      storage: undefined,
-      persistSession: false,
-      autoRefreshToken: false,
-    }
+  console.info("[SupabaseAdmin] creating client", {
+    hasUrl: Boolean(supabaseServerEnv.SUPABASE_URL),
+    hasServiceRoleKey: Boolean(supabaseServerEnv.SUPABASE_SERVICE_ROLE_KEY),
+    requestTimeoutMs: SUPABASE_REQUEST_TIMEOUT_MS,
   });
+
+  const client = createClient<Database>(
+    supabaseServerEnv.SUPABASE_URL,
+    supabaseServerEnv.SUPABASE_SERVICE_ROLE_KEY,
+    {
+      global: {
+        fetch: createTimedFetch("SupabaseAdmin", SUPABASE_REQUEST_TIMEOUT_MS),
+      },
+      auth: {
+        storage: undefined,
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    },
+  );
+
+  console.info("[SupabaseAdmin] client ready");
+  return client;
 }
 
 let _supabaseAdmin: ReturnType<typeof createSupabaseAdminClient> | undefined;

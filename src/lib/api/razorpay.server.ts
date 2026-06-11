@@ -1,6 +1,8 @@
 import crypto from "node:crypto";
 import process from "node:process";
 
+import { assertRequiredEnv, createTimedFetch } from "@/lib/server-observability";
+
 export type ReservationDraft = {
   name: string;
   email: string;
@@ -25,30 +27,34 @@ export type RazorpayOrderRecord = {
 };
 
 export function getRazorpayConfig() {
-  const keyId = process.env.RAZORPAY_KEY_ID;
-  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+  const env = assertRequiredEnv(
+    "Razorpay",
+    {
+      RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
+      RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET,
+      RESERVATION_PRICE_INR_PAISA: process.env.RESERVATION_PRICE_INR_PAISA,
+    },
+    ["RAZORPAY_KEY_ID", "RAZORPAY_KEY_SECRET", "RESERVATION_PRICE_INR_PAISA"],
+  );
+
   const merchantName = process.env.RAZORPAY_MERCHANT_NAME ?? "Seen/Differently";
-  const amountRaw = process.env.RESERVATION_PRICE_INR_PAISA ?? "1000000";
   const currency = (process.env.RESERVATION_CURRENCY ?? "INR").toUpperCase();
-
-  if (!keyId) {
-    throw new Error("Missing RAZORPAY_KEY_ID. Add it to enable checkout.");
-  }
-
-  if (!keySecret) {
-    throw new Error("Missing RAZORPAY_KEY_SECRET. Add it to verify payments.");
-  }
-
-  const amount = Number(amountRaw);
+  const amount = Number(env.RESERVATION_PRICE_INR_PAISA);
   if (!Number.isFinite(amount) || amount <= 0) {
-    throw new Error(
-      "Missing RESERVATION_PRICE_INR_PAISA. Set the workshop price before taking payments.",
-    );
+    throw new Error("RESERVATION_PRICE_INR_PAISA must be a positive number.");
   }
+
+  console.info("[Razorpay] config ready", {
+    hasKeyId: Boolean(env.RAZORPAY_KEY_ID),
+    hasKeySecret: Boolean(env.RAZORPAY_KEY_SECRET),
+    amountPaise: Math.round(amount),
+    currency,
+    merchantName,
+  });
 
   return {
-    keyId,
-    keySecret,
+    keyId: env.RAZORPAY_KEY_ID,
+    keySecret: env.RAZORPAY_KEY_SECRET,
     merchantName,
     amount: Math.round(amount),
     currency,
@@ -63,11 +69,16 @@ function buildReceipt() {
   return `seen-${crypto.randomUUID().replace(/-/g, "").slice(0, 12)}`;
 }
 
+const RAZORPAY_REQUEST_TIMEOUT_MS = 10_000;
+const razorpayFetch = createTimedFetch("Razorpay", RAZORPAY_REQUEST_TIMEOUT_MS);
+
 async function readRazorpayOrderResponse(orderId: string) {
   const { keyId, keySecret } = getRazorpayConfig();
   const auth = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
 
-  const response = await fetch(`https://api.razorpay.com/v1/orders/${orderId}`, {
+  console.info("[Razorpay] lookup start", { orderId, timeoutMs: RAZORPAY_REQUEST_TIMEOUT_MS });
+
+  const response = await razorpayFetch(`https://api.razorpay.com/v1/orders/${orderId}`, {
     method: "GET",
     headers: {
       Authorization: `Basic ${auth}`,
@@ -94,7 +105,14 @@ export async function createRazorpayOrder(input: RazorpayOrderInput) {
   const auth = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
   const receipt = input.reservationRef ? `seen-${input.reservationRef}` : buildReceipt();
 
-  const response = await fetch("https://api.razorpay.com/v1/orders", {
+  console.info("[Razorpay] order create start", {
+    receipt,
+    amount: input.amount,
+    currency: input.currency,
+    timeoutMs: RAZORPAY_REQUEST_TIMEOUT_MS,
+  });
+
+  const response = await razorpayFetch("https://api.razorpay.com/v1/orders", {
     method: "POST",
     headers: {
       Authorization: `Basic ${auth}`,
@@ -150,15 +168,17 @@ export async function fetchRazorpayOrder(orderId: string) {
   return readRazorpayOrderResponse(orderId);
 }
 
-export async function refundRazorpayPayment(
-  paymentId: string,
-  amount?: number,
-  reason?: string,
-) {
+export async function refundRazorpayPayment(paymentId: string, amount?: number, reason?: string) {
   const { keyId, keySecret } = getRazorpayConfig();
   const auth = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
 
-  const response = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}/refund`, {
+  console.info("[Razorpay] refund start", {
+    paymentId,
+    amount,
+    timeoutMs: RAZORPAY_REQUEST_TIMEOUT_MS,
+  });
+
+  const response = await razorpayFetch(`https://api.razorpay.com/v1/payments/${paymentId}/refund`, {
     method: "POST",
     headers: {
       Authorization: `Basic ${auth}`,
