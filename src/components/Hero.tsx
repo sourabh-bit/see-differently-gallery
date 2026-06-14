@@ -1,6 +1,5 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
-import portrait from "@/assets/hero-portrait.jpg";
 
 export function Hero() {
   const ref = useRef<HTMLElement>(null);
