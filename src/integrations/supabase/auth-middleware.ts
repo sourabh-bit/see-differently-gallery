@@ -2,23 +2,24 @@
 import { createMiddleware } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { createClient } from "@supabase/supabase-js";
+import WebSocket from "ws";
 import type { Database } from "./types";
-import { createTimedFetch, assertRequiredEnv } from "@/lib/server-observability";
-
-const SUPABASE_AUTH_REQUEST_TIMEOUT_MS = 10_000;
-
-const supabaseAuthEnv = assertRequiredEnv(
-  "SupabaseAuth",
-  {
-    SUPABASE_URL: process.env.SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY: process.env.SUPABASE_PUBLISHABLE_KEY,
-  },
-  ["SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY"],
-);
 
 export const requireSupabaseAuth = createMiddleware({ type: "function" }).server(
   async ({ next }) => {
-    console.info("[SupabaseAuth] request start");
+    const SUPABASE_URL = process.env.SUPABASE_URL;
+    const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY;
+
+    if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+      const missing = [
+        ...(!SUPABASE_URL ? ["SUPABASE_URL"] : []),
+        ...(!SUPABASE_PUBLISHABLE_KEY ? ["SUPABASE_PUBLISHABLE_KEY"] : []),
+      ];
+      const message = `Missing Supabase environment variable(s): ${missing.join(", ")}. Connect Supabase in Lovable Cloud.`;
+      console.error(`[Supabase] ${message}`);
+      throw new Error(message);
+    }
+
     const request = getRequest();
 
     if (!request?.headers) {
@@ -40,31 +41,22 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
       throw new Error("Unauthorized: No token provided");
     }
 
-    console.info("[SupabaseAuth] creating client", {
-      hasUrl: Boolean(supabaseAuthEnv.SUPABASE_URL),
-      hasPublishableKey: Boolean(supabaseAuthEnv.SUPABASE_PUBLISHABLE_KEY),
-      requestTimeoutMs: SUPABASE_AUTH_REQUEST_TIMEOUT_MS,
-    });
-
-    const supabase = createClient<Database>(
-      supabaseAuthEnv.SUPABASE_URL,
-      supabaseAuthEnv.SUPABASE_PUBLISHABLE_KEY,
-      {
-        global: {
-          fetch: createTimedFetch("SupabaseAuth", SUPABASE_AUTH_REQUEST_TIMEOUT_MS),
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-        auth: {
-          storage: undefined,
-          persistSession: false,
-          autoRefreshToken: false,
+    const supabase = createClient<Database>(SUPABASE_URL!, SUPABASE_PUBLISHABLE_KEY!, {
+      realtime: {
+        transport: WebSocket as any,
+      },
+      global: {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
       },
-    );
+      auth: {
+        storage: undefined,
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    });
 
-    console.info("[SupabaseAuth] fetching claims");
     const { data, error } = await supabase.auth.getClaims(token);
     if (error || !data?.claims) {
       throw new Error("Unauthorized: Invalid token");
@@ -74,7 +66,6 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
       throw new Error("Unauthorized: No user ID found in token");
     }
 
-    console.info("[SupabaseAuth] claims verified", { userId: data.claims.sub });
     return next({
       context: {
         supabase,
