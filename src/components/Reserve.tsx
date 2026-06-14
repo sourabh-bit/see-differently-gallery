@@ -79,8 +79,7 @@ export function Reserve() {
               <span className="text-paper">Rs {WORKSHOP_PRICE.toLocaleString()}</span>.
             </p>
             <p className="text-paper/60 text-sm md:text-base">
-              Reserve your seat, then continue to Razorpay checkout for instant payment
-              verification.
+              Reserve your seat, then continue to UPI payment. Admin verifies and confirms.
             </p>
           </div>
         </div>
@@ -133,7 +132,7 @@ export function Reserve() {
                 Mobile Photography <span className="italic">Masterclass</span>
               </div>
               <p className="mt-3 md:mt-4 text-graphite max-w-md text-sm md:text-base">
-                Enter your details to reserve a seat, then continue to the Razorpay payment page.
+                Enter your details to reserve a seat, then pay Rs 10,000 via UPI.
               </p>
 
               <form onSubmit={onSubmit} className="mt-8 md:mt-10 grid gap-6 md:gap-8">
