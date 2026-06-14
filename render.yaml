@@ -3,5 +3,5 @@ services:
     name: see-differently-gallery
     env: node
     plan: free
-    buildCommand: npm run build
-    startCommand: npm start
+    buildCommand: bun install && bun run build
+    startCommand: bun run start
