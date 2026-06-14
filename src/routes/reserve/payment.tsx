@@ -1,474 +1,154 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-
-import { createReservation, markReservationPaid } from "@/lib/reservations.functions";
-import {
-  createReservationCheckout,
-  verifyReservationPayment,
-} from "@/lib/api/reservation.functions";
 import { useServerFn } from "@tanstack/react-start";
 
-type ReservationDraft = {
-  name: string;
-  email: string;
-  whatsapp: string;
-  notes: string;
-};
-
-const WORKSHOP_PRICE = 10000;
-const CHECKOUT_SCRIPT_SRC = "https://checkout.razorpay.com/v1/checkout.js";
-const RESERVE_FORM_URL = "/#reserve";
-const REDIRECT_DELAY_MS = 1200;
-const SERVER_FN_TIMEOUT_MS = 20_000;
-const SCRIPT_TIMEOUT_MS = 20_000;
-
-type RazorpaySuccess = {
-  razorpay_payment_id: string;
-  razorpay_signature: string;
-};
-
-type RazorpaySummary = {
-  orderId: string;
-  paymentId: string;
-  amount: number;
-  currency: string;
-  receipt: string;
-  reservationRef: string;
-};
-
-type RazorpayCheckoutOptions = {
-  key: string;
-  amount: number;
-  currency: string;
-  name: string;
-  description: string;
-  order_id: string;
-  prefill: {
-    name: string;
-    email: string;
-    contact: string;
-  };
-  notes: Record<string, string>;
-  theme: {
-    color: string;
-  };
-  modal: {
-    ondismiss: () => void;
-  };
-  handler: (response: RazorpaySuccess) => void;
-};
-
-declare global {
-  interface Window {
-    Razorpay?: new (options: RazorpayCheckoutOptions) => { open: () => void };
-  }
-}
-
-function safeGetSessionItem(key: string) {
-  try {
-    return window.sessionStorage.getItem(key);
-  } catch {
-    return null;
-  }
-}
-
-function safeSetSessionItem(key: string, value: string) {
-  try {
-    window.sessionStorage.setItem(key, value);
-  } catch {
-    // Ignore browser storage restrictions.
-  }
-}
-
-function safeRemoveSessionItem(key: string) {
-  try {
-    window.sessionStorage.removeItem(key);
-  } catch {
-    // Ignore browser storage restrictions.
-  }
-}
-
-function withTimeout<T>(promise: Promise<T>, label: string, timeoutMs = SERVER_FN_TIMEOUT_MS) {
-  return Promise.race([
-    promise,
-    new Promise<T>((_, reject) => {
-      window.setTimeout(() => {
-        reject(new Error(`${label} took too long. Please try again.`));
-      }, timeoutMs);
-    }),
-  ]);
-}
+import { claimReservationPaid, getReservation } from "@/lib/reservations.functions";
 
 export const Route = createFileRoute("/reserve/payment")({
   component: PaymentPage,
 });
 
-function loadRazorpayCheckoutScript() {
-  return new Promise<void>((resolve, reject) => {
-    if (window.Razorpay) {
-      resolve();
-      return;
-    }
-
-    const existing = document.querySelector<HTMLScriptElement>(
-      `script[src="${CHECKOUT_SCRIPT_SRC}"]`,
-    );
-
-    if (existing) {
-      existing.addEventListener("load", () => resolve(), { once: true });
-      existing.addEventListener(
-        "error",
-        () => reject(new Error("Unable to load Razorpay Checkout.")),
-        { once: true },
-      );
-      window.setTimeout(
-        () => reject(new Error("Razorpay Checkout took too long to load.")),
-        SCRIPT_TIMEOUT_MS,
-      );
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = CHECKOUT_SCRIPT_SRC;
-    script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Unable to load Razorpay Checkout."));
-    document.body.appendChild(script);
-    window.setTimeout(
-      () => reject(new Error("Razorpay Checkout took too long to load.")),
-      SCRIPT_TIMEOUT_MS,
-    );
-  });
-}
+type Loaded = Awaited<ReturnType<typeof getReservation>>;
 
 function PaymentPage() {
-  const createCheckout = useServerFn(createReservationCheckout);
-  const markPaid = useServerFn(markReservationPaid);
-  const createReservationFn = useServerFn(createReservation);
-  const [draft, setDraft] = useState<ReservationDraft | null>(null);
-  const [reservationRef, setReservationRef] = useState<string | null>(null);
-  const [hasLoadedDraft, setHasLoadedDraft] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
+  const navigate = useNavigate();
+  const fetchReservation = useServerFn(getReservation);
+  const claimPaid = useServerFn(claimReservationPaid);
+
+  const [ref, setRef] = useState<string | null>(null);
+  const [data, setData] = useState<Loaded | null>(null);
+  const [note, setNote] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const raw = safeGetSessionItem("seen-reservation-draft");
-    const ref = safeGetSessionItem("seen-reservation-ref");
-
-    if (ref) {
-      setReservationRef(ref);
-    }
-
-    if (!raw) {
-      setHasLoadedDraft(true);
-      return;
-    }
-
+    let r: string | null = null;
     try {
-      setDraft(JSON.parse(raw) as ReservationDraft);
+      r = sessionStorage.getItem("seen-reservation-ref");
     } catch {
-      setErrorMessage("Could not read the reservation details. Please go back and submit again.");
+      r = null;
     }
-    setHasLoadedDraft(true);
-  }, []);
-
-  useEffect(() => {
-    if (!hasLoadedDraft || draft) return;
-
-    const timer = window.setTimeout(() => {
-      window.location.replace(RESERVE_FORM_URL);
-    }, REDIRECT_DELAY_MS);
-
-    return () => window.clearTimeout(timer);
-  }, [draft, hasLoadedDraft]);
-
-  const startCheckout = async () => {
-    if (isProcessing) {
+    if (!r) {
+      window.location.replace("/#reserve");
       return;
     }
+    setRef(r);
+    fetchReservation({ data: { ref: r } })
+      .then(setData)
+      .catch((e) => setError(e instanceof Error ? e.message : "Could not load reservation."))
+      .finally(() => setLoading(false));
+  }, [fetchReservation]);
 
-    if (!draft) {
-      setErrorMessage("No reservation details were found. Please submit the form again.");
-      return;
-    }
-
-    let ref = reservationRef ?? safeGetSessionItem("seen-reservation-ref");
-
-    setErrorMessage("");
-    setIsProcessing(true);
-
+  const onConfirm = async () => {
+    if (!ref) return;
+    setSubmitting(true);
+    setError(null);
     try {
-      if (!ref) {
-        const reservation = await withTimeout(
-          createReservationFn({ data: draft }),
-          "Saving your reservation",
-        );
-        ref = reservation.ref;
-        safeSetSessionItem("seen-reservation-ref", ref);
-      }
-
-      const checkout = await withTimeout(
-        createCheckout({
-          data: {
-            ...draft,
-            reservationRef: ref,
-          },
-        }),
-        "Preparing Razorpay checkout",
-      );
-
-      await loadRazorpayCheckoutScript();
-
-      if (!window.Razorpay) {
-        throw new Error("Razorpay Checkout is unavailable in this browser.");
-      }
-
-      const payment = new window.Razorpay({
-        key: checkout.keyId,
-        amount: checkout.amount,
-        currency: checkout.currency,
-        name: checkout.merchantName,
-        description: "Seen/Differently masterclass reservation",
-        order_id: checkout.orderId,
-        prefill: {
-          name: draft.name,
-          email: draft.email,
-          contact: draft.whatsapp,
-        },
-        notes: {
-          student_name: draft.name,
-          student_email: draft.email,
-          student_whatsapp: draft.whatsapp,
-          student_notes: draft.notes || "None",
-          reservation_ref: ref,
-          receipt: checkout.receipt,
-        },
-        theme: {
-          color: "#111111",
-        },
-        modal: {
-          ondismiss: () => setIsProcessing(false),
-        },
-        handler: async (response) => {
-          try {
-            if (!response.razorpay_payment_id || !response.razorpay_signature) {
-              throw new Error("Missing Razorpay payment details.");
-            }
-            if (!ref) {
-              throw new Error("Missing reservation reference.");
-            }
-
-            const paymentId = response.razorpay_payment_id;
-            const signature = response.razorpay_signature;
-            const reservationRef = ref;
-
-            const verification = await verifyReservationPayment({
-              data: {
-                orderId: checkout.orderId,
-                paymentId,
-                signature,
-              },
-            });
-
-            await markPaid({
-              data: {
-                ref,
-                orderId: checkout.orderId,
-                paymentId,
-                signature,
-              },
-            });
-
-            const receipt = verification.receipt ?? checkout.receipt ?? "";
-            const currency = verification.currency ?? checkout.currency ?? "INR";
-
-            const paymentSummary: RazorpaySummary = {
-              orderId: checkout.orderId,
-              paymentId,
-              amount: verification.amount,
-              currency,
-              receipt,
-              reservationRef,
-            };
-
-            safeSetSessionItem("seen-razorpay-payment", JSON.stringify(paymentSummary));
-            safeRemoveSessionItem("seen-reservation-draft");
-            safeRemoveSessionItem("seen-reservation-ref");
-            window.location.replace("/reserve/complete");
-          } catch (verificationError) {
-            setErrorMessage(
-              verificationError instanceof Error
-                ? verificationError.message
-                : "Payment was received, but verification failed.",
-            );
-            setIsProcessing(false);
-          }
-        },
-      });
-
-      payment.open();
-    } catch (checkoutError) {
-      setErrorMessage(
-        checkoutError instanceof Error ? checkoutError.message : "Unable to start checkout.",
-      );
-      setIsProcessing(false);
+      await claimPaid({ data: { ref, note: note.trim() } });
+      navigate({ to: "/reserve/complete" });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not submit.");
+      setSubmitting(false);
     }
   };
 
-  if (!hasLoadedDraft) {
-    return (
-      <main className="min-h-screen bg-ink text-paper px-6 md:px-12 py-24 md:py-32">
-        <div className="absolute left-6 top-6 z-20 md:left-12 md:top-10">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-paper/60 transition-colors hover:text-paper"
-          >
-            <span aria-hidden className="text-lg leading-none">
-              &larr;
-            </span>
-            <span className="mono text-[10px] tracking-[0.3em] uppercase">Home</span>
-          </Link>
-        </div>
-        <div className="relative mx-auto max-w-3xl">
-          <div className="mono text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-paper/55 mb-6">
-            Razorpay checkout
-          </div>
-          <h1 className="serif text-5xl md:text-7xl leading-none">Preparing your reservation.</h1>
-          <p className="mt-6 max-w-xl text-paper/70 text-base md:text-lg leading-7">
-            We are loading the reservation slip before opening Razorpay.
-          </p>
-        </div>
-      </main>
-    );
-  }
-
-  if (!draft) {
-    return (
-      <main className="min-h-screen bg-ink text-paper px-6 md:px-12 py-24 md:py-32">
-        <div className="absolute left-6 top-6 z-20 md:left-12 md:top-10">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-paper/60 transition-colors hover:text-paper"
-          >
-            <span aria-hidden className="text-lg leading-none">
-              &larr;
-            </span>
-            <span className="mono text-[10px] tracking-[0.3em] uppercase">Home</span>
-          </Link>
-        </div>
-        <div className="relative mx-auto max-w-3xl">
-          <div className="mono text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-paper/55 mb-6">
-            Razorpay checkout
-          </div>
-          <h1 className="serif text-5xl md:text-7xl leading-none">Sending you back to reserve.</h1>
-          <p className="mt-6 max-w-xl text-paper/70 text-base md:text-lg leading-7">
-            We could not restore your reservation slip, so we are returning you to the form.
-          </p>
-        </div>
-      </main>
-    );
-  }
-
   return (
-    <main className="relative min-h-screen overflow-hidden bg-ink text-paper px-6 md:px-12 py-20 md:py-28">
+    <main className="relative min-h-screen overflow-hidden bg-ink text-paper px-6 md:px-12 py-20 md:py-28 grain">
       <div className="absolute left-6 top-6 z-20 md:left-12 md:top-10">
         <Link
           to="/"
           className="inline-flex items-center gap-2 text-paper/60 transition-colors hover:text-paper"
         >
-            <span aria-hidden className="text-lg leading-none">
-              &larr;
-            </span>
+          <span aria-hidden className="text-lg leading-none">&larr;</span>
           <span className="mono text-[10px] tracking-[0.3em] uppercase">Home</span>
         </Link>
       </div>
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-60"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at 15% 15%, rgba(255,255,255,0.08), transparent 28%), radial-gradient(circle at 85% 10%, rgba(255,255,255,0.05), transparent 24%), repeating-linear-gradient(90deg, rgba(255,255,255,0.04) 0 1px, transparent 1px 72px), repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 72px)",
-        }}
-      />
-      <div aria-hidden className="pointer-events-none absolute inset-0 grain opacity-50" />
 
-      <div className="relative mx-auto mt-6 max-w-7xl">
-        <div className="mono text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-paper/55 mb-6 md:mb-8">
-          Razorpay checkout
+      <div className="relative mx-auto mt-6 max-w-5xl">
+        <div className="mono text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-paper/55 mb-6">
+          UPI Payment
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] items-start">
-          <div className="space-y-8">
-            <div>
-              <h1 className="serif text-5xl md:text-7xl xl:text-[5.75rem] leading-[0.92] max-w-2xl">
-                Complete your reservation <span className="italic">Rs 10,000</span>.
-              </h1>
-              <p className="mt-5 max-w-xl text-paper/70 text-sm md:text-base leading-6">
-                Your seat is held under {draft.name}. One secure payment, then we move straight to
-                confirmation.
-              </p>
-            </div>
+        {loading ? (
+          <h1 className="serif text-4xl md:text-6xl">Loading your reservation…</h1>
+        ) : !data ? (
+          <h1 className="serif text-4xl md:text-6xl">{error ?? "Reservation not found."}</h1>
+        ) : (
+          <>
+            <h1 className="serif text-5xl md:text-7xl leading-[0.92]">
+              Pay <span className="italic">Rs {data.amountRupees.toLocaleString("en-IN")}</span> to
+              reserve.
+            </h1>
+            <p className="mt-4 text-paper/70 text-base md:text-lg max-w-xl">
+              Scan the QR with any UPI app, or pay manually to{" "}
+              <span className="text-paper">{data.upiId}</span>. Then tap “I have paid” so we can
+              verify and confirm your seat.
+            </p>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-2xl border border-paper/10 bg-white/5 px-5 py-4 text-center backdrop-blur-sm">
-                <div className="mono text-[10px] tracking-[0.3em] uppercase text-paper/45">
-                  Seat held
+            <div className="mt-10 grid gap-8 md:grid-cols-2 items-start">
+              <div className="rounded-2xl border border-paper/15 bg-paper text-ink p-6 flex flex-col items-center">
+                <img
+                  src={data.qrDataUrl}
+                  alt="UPI QR code"
+                  className="w-64 h-64 md:w-72 md:h-72"
+                />
+                <div className="mt-4 text-center">
+                  <div className="mono text-[10px] tracking-[0.3em] uppercase text-graphite">
+                    UPI ID
+                  </div>
+                  <div className="serif text-2xl mt-1 break-all">{data.upiId}</div>
                 </div>
-                <div className="mt-2 serif text-2xl leading-none">{draft.name}</div>
+                <a
+                  href={data.upiUri}
+                  className="mt-5 inline-flex items-center justify-center bg-ink text-paper px-5 py-3 mono text-[11px] tracking-[0.3em] uppercase hover:bg-graphite md:hidden"
+                >
+                  Open UPI app
+                </a>
               </div>
-              <div className="rounded-2xl border border-paper/10 bg-white/5 px-5 py-4 text-center backdrop-blur-sm">
-                <div className="mono text-[10px] tracking-[0.3em] uppercase text-paper/45">
-                  Payment
-                </div>
-                <div className="mt-2 serif text-2xl leading-none">
-                  Rs {WORKSHOP_PRICE.toLocaleString()}
-                </div>
-              </div>
-            </div>
 
-            <div className="rounded-[1.5rem] border border-paper/10 bg-white/5 p-6 md:p-8 text-center backdrop-blur-sm">
-              <div className="flex items-center justify-center gap-4">
-                <div className="mono text-[10px] tracking-[0.3em] uppercase text-paper/55">
-                  Payment action
+              <div className="rounded-2xl border border-paper/15 bg-white/5 p-6 md:p-8 backdrop-blur-sm">
+                <div className="mono text-[10px] tracking-[0.3em] uppercase text-paper/55 mb-3">
+                  Reservation
                 </div>
-                <div className="h-2 w-2 rounded-full bg-paper/70" />
-              </div>
-              <button
-                type="button"
-                onClick={startCheckout}
-                disabled={isProcessing}
-                className="mx-auto mt-5 inline-flex min-w-[220px] items-center justify-center rounded-full bg-paper px-6 py-3.5 text-sm md:text-base font-medium text-ink transition-all hover:bg-paper/90 disabled:cursor-wait disabled:opacity-70"
-              >
-                {isProcessing ? "Opening Razorpay..." : "Pay securely with Razorpay"}
-              </button>
-            </div>
-          </div>
-          <div className="rounded-[1.75rem] border border-paper/10 bg-black/35 p-6 md:p-8 text-center backdrop-blur-sm">
-            <div className="mono text-[10px] tracking-[0.3em] uppercase text-paper/45 mb-4">
-              Reservation slip
-            </div>
-            <div className="flex flex-col items-center gap-4">
-              <div>
-                <div className="serif text-4xl md:text-6xl leading-[0.92]">{draft.name}</div>
-                <p className="mt-4 text-paper/70 text-sm md:text-base leading-6">
-                  {draft.email}
-                  <br />
-                  {draft.whatsapp}
+                <div className="serif text-3xl">{data.reservation.name}</div>
+                <div className="mt-1 text-paper/70 text-sm">
+                  {data.reservation.email} · {data.reservation.phone}
+                </div>
+                <div className="mono text-[10px] tracking-[0.3em] uppercase text-paper/45 mt-4">
+                  Ref · {data.reservation.ref}
+                </div>
+
+                <label className="block mt-6">
+                  <div className="mono text-[10px] tracking-[0.3em] uppercase text-paper/55 mb-2">
+                    Transaction ID / note (optional)
+                  </div>
+                  <input
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    maxLength={200}
+                    className="w-full bg-transparent border-b border-paper/30 focus:border-paper outline-none serif text-xl py-2"
+                    placeholder="UPI ref no. or any note"
+                  />
+                </label>
+
+                {error ? <p className="mt-3 text-red-400 text-sm">{error}</p> : null}
+
+                <button
+                  type="button"
+                  onClick={onConfirm}
+                  disabled={submitting}
+                  className="mt-6 w-full bg-paper text-ink px-6 py-4 mono text-[11px] tracking-[0.3em] uppercase hover:bg-bone disabled:opacity-60"
+                >
+                  {submitting ? "Submitting…" : "I have paid"}
+                </button>
+                <p className="mt-3 text-paper/50 text-xs">
+                  After you submit, the admin will verify the payment and confirm your seat.
                 </p>
               </div>
-              <div className="h-3 w-3 rounded-full bg-paper/85 shadow-[0_0_0_12px_rgba(255,255,255,0.05)]" />
             </div>
-            {draft.notes ? (
-              <p className="mx-auto mt-6 max-w-md border-t border-paper/10 pt-5 text-paper/60 text-sm leading-6">
-                {draft.notes}
-              </p>
-            ) : null}
-          </div>
-        </div>
-
-        {errorMessage ? (
-          <p className="relative mt-6 text-sm text-red-300/90">{errorMessage}</p>
-        ) : null}
+          </>
+        )}
       </div>
     </main>
   );

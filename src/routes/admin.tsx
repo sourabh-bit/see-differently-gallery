@@ -3,10 +3,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 
-import { adminList, adminRefund } from "@/lib/reservations.functions";
+import { adminDecide, adminList } from "@/lib/reservations.functions";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin - Reservations" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [
+      { title: "Admin - Reservations" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: AdminPage,
 });
 
@@ -15,19 +20,16 @@ type Row = {
   name: string;
   email: string;
   phone: string;
-  notes: string | null;
   amount_paise: number;
-  payment_status: string;
-  paid_at: string | null;
-  payment_order_id: string | null;
-  payment_id: string | null;
-  refunded_at: string | null;
-  refund_reason: string | null;
+  status: string;
+  payment_note: string | null;
+  claimed_paid_at: string | null;
+  decided_at: string | null;
   created_at: string;
   updated_at: string;
 };
 
-type Filter = "all" | "pending" | "paid" | "refunded";
+type Filter = "all" | "pending" | "approved" | "rejected";
 
 function AdminPage() {
   const [passcode, setPasscode] = useState("");
@@ -37,7 +39,7 @@ function AdminPage() {
   const [error, setError] = useState<string | null>(null);
 
   const list = useServerFn(adminList);
-  const refund = useServerFn(adminRefund);
+  const decide = useServerFn(adminDecide);
 
   const load = async (pc: string, f: Filter) => {
     setError(null);
@@ -67,9 +69,9 @@ function AdminPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
-  const refundMut = useMutation({
-    mutationFn: (v: { ref: string; reason?: string }) =>
-      refund({ data: { passcode, ref: v.ref, reason: v.reason } }),
+  const decideMut = useMutation({
+    mutationFn: (v: { ref: string; decision: "approved" | "rejected" }) =>
+      decide({ data: { passcode, ref: v.ref, decision: v.decision } }),
     onSuccess: () => load(passcode, filter),
   });
 
@@ -83,7 +85,9 @@ function AdminPage() {
           }}
           className="max-w-sm w-full"
         >
-          <div className="mono text-[10px] tracking-[0.3em] uppercase text-paper/60 mb-3">Admin</div>
+          <div className="mono text-[10px] tracking-[0.3em] uppercase text-paper/60 mb-3">
+            Admin
+          </div>
           <h1 className="serif text-5xl md:text-6xl leading-[0.9] mb-8">
             Enter <span className="italic">passcode</span>.
           </h1>
@@ -111,17 +115,18 @@ function AdminPage() {
             <div className="mono text-[10px] tracking-[0.3em] uppercase text-graphite">Admin</div>
             <h1 className="serif text-4xl md:text-6xl leading-[0.95]">Reservations</h1>
             <p className="mt-3 max-w-2xl text-sm md:text-base text-graphite">
-              Review registrations, payment status, and refund history. This panel no longer makes
-              accept/reject decisions.
+              Verify UPI payments and approve or reject reservations.
             </p>
           </div>
           <div className="flex gap-2 flex-wrap">
-            {(["all", "pending", "paid", "refunded"] as Filter[]).map((f) => (
+            {(["all", "pending", "approved", "rejected"] as Filter[]).map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
                 className={`mono text-[10px] tracking-[0.3em] uppercase px-3 py-2 border ${
-                  filter === f ? "bg-ink text-paper border-ink" : "border-ink/30 text-graphite hover:text-ink"
+                  filter === f
+                    ? "bg-ink text-paper border-ink"
+                    : "border-ink/30 text-graphite hover:text-ink"
                 }`}
               >
                 {f}
@@ -153,7 +158,7 @@ function AdminPage() {
                       {row.ref}
                     </div>
                   </div>
-                  <StatusBadge status={row.payment_status} />
+                  <StatusBadge status={row.status} />
                 </div>
 
                 <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-4 text-sm">
@@ -163,59 +168,48 @@ function AdminPage() {
                     label="Amount"
                     value={`Rs ${(row.amount_paise / 100).toLocaleString("en-IN")}`}
                   />
+                  <Field label="Created" value={new Date(row.created_at).toLocaleString()} />
                   <Field
-                    label="Created"
-                    value={new Date(row.created_at).toLocaleString()}
+                    label="Claimed paid at"
+                    value={
+                      row.claimed_paid_at
+                        ? new Date(row.claimed_paid_at).toLocaleString()
+                        : "Not claimed yet"
+                    }
                   />
                   <Field
-                    label="Paid at"
-                    value={row.paid_at ? new Date(row.paid_at).toLocaleString() : "Not paid yet"}
+                    label="Decided at"
+                    value={row.decided_at ? new Date(row.decided_at).toLocaleString() : "—"}
                   />
-                  <Field
-                    label="Updated"
-                    value={new Date(row.updated_at).toLocaleString()}
-                  />
-                  <Field label="Order ID" value={row.payment_order_id ?? "Not set"} />
-                  <Field label="Payment ID" value={row.payment_id ?? "Not set"} />
                 </div>
 
-                {row.notes ? (
+                {row.payment_note ? (
                   <div className="mt-5 border-t border-ink/10 pt-4">
                     <div className="mono text-[10px] tracking-[0.3em] uppercase text-graphite mb-2">
-                      Notes
+                      Payment note
                     </div>
-                    <p className="text-sm leading-6 text-ink/80">{row.notes}</p>
-                  </div>
-                ) : null}
-
-                {row.refund_reason ? (
-                  <div className="mt-5 border-t border-ink/10 pt-4">
-                    <div className="mono text-[10px] tracking-[0.3em] uppercase text-graphite mb-2">
-                      Refund reason
-                    </div>
-                    <p className="text-sm leading-6 text-ink/80">{row.refund_reason}</p>
-                    {row.refunded_at ? (
-                      <p className="mt-2 text-xs text-graphite">
-                        Refunded at {new Date(row.refunded_at).toLocaleString()}
-                      </p>
-                    ) : null}
+                    <p className="text-sm leading-6 text-ink/80">{row.payment_note}</p>
                   </div>
                 ) : null}
 
                 <div className="mt-5 flex flex-wrap gap-3">
                   <button
-                    onClick={async () => {
-                      const reason = window.prompt("Refund note (optional):") ?? undefined;
-                      await refundMut.mutateAsync({ ref: row.ref, reason });
-                    }}
-                    disabled={
-                      refundMut.isPending ||
-                      row.payment_status === "refunded" ||
-                      row.payment_status !== "paid"
+                    onClick={() =>
+                      decideMut.mutate({ ref: row.ref, decision: "approved" })
                     }
+                    disabled={decideMut.isPending || row.status === "approved"}
                     className="mono text-[10px] tracking-[0.3em] uppercase px-3 py-2 bg-ink text-paper hover:bg-graphite disabled:opacity-50"
                   >
-                    Issue refund
+                    Approve
+                  </button>
+                  <button
+                    onClick={() =>
+                      decideMut.mutate({ ref: row.ref, decision: "rejected" })
+                    }
+                    disabled={decideMut.isPending || row.status === "rejected"}
+                    className="mono text-[10px] tracking-[0.3em] uppercase px-3 py-2 border border-ink text-ink hover:bg-ink hover:text-paper disabled:opacity-50"
+                  >
+                    Reject
                   </button>
                 </div>
               </div>
@@ -238,13 +232,14 @@ function Field({ label, value }: { label: string; value: string }) {
 
 function StatusBadge({ status }: { status: string }) {
   const cls =
-    status === "paid"
+    status === "approved"
       ? "bg-emerald-700 text-paper"
-      : status === "refunded"
-        ? "bg-amber-500 text-ink"
+      : status === "rejected"
+        ? "bg-red-700 text-paper"
         : "bg-ink/10 text-graphite";
-
   return (
-    <span className={`mono text-[10px] tracking-[0.3em] uppercase px-2 py-1 ${cls}`}>{status}</span>
+    <span className={`mono text-[10px] tracking-[0.3em] uppercase px-2 py-1 ${cls}`}>
+      {status}
+    </span>
   );
 }
