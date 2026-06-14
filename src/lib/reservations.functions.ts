@@ -1,15 +1,27 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-
-import { refundRazorpayPayment } from "@/lib/api/razorpay.server";
+import QRCode from "qrcode";
 
 const AMOUNT_RUPEES = 10000;
+const UPI_ID = "8920145102@ptsbi";
+const PAYEE_NAME = "Makeup Photography Masterclass";
 
 function shortRef() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let s = "";
   for (let i = 0; i < 8; i += 1) s += chars[Math.floor(Math.random() * chars.length)];
   return `MPM-${s}`;
+}
+
+function buildUpiUri(ref: string) {
+  const params = new URLSearchParams({
+    pa: UPI_ID,
+    pn: PAYEE_NAME,
+    am: String(AMOUNT_RUPEES),
+    cu: "INR",
+    tn: `Masterclass ${ref}`,
+  });
+  return `upi://pay?${params.toString()}`;
 }
 
 const reservationSchema = z.object({
@@ -35,22 +47,48 @@ export const createReservation = createServerFn({ method: "POST" })
       name: data.name,
       email: data.email,
       phone: data.whatsapp,
-      notes: data.notes ?? null,
       amount_paise: AMOUNT_RUPEES * 100,
-      payment_status: "pending",
+      status: "pending",
+      payment_note: data.notes ? data.notes : null,
     });
 
     if (error) throw new Error(error.message);
     return { ref };
   });
 
-export const markReservationPaid = createServerFn({ method: "POST" })
+export const getReservation = createServerFn({ method: "POST" })
+  .validator(z.object({ ref: z.string().min(4).max(40) }))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row, error } = await supabaseAdmin
+      .from("reservations")
+      .select(
+        "ref,name,email,phone,amount_paise,status,payment_note,claimed_paid_at,decided_at,created_at",
+      )
+      .eq("ref", data.ref)
+      .maybeSingle();
+
+    if (error) throw new Error(error.message);
+    if (!row) throw new Error("Reservation not found.");
+
+    const upiUri = buildUpiUri(row.ref);
+    const qrDataUrl = await QRCode.toDataURL(upiUri, { margin: 1, width: 360 });
+
+    return {
+      reservation: row,
+      upiId: UPI_ID,
+      payeeName: PAYEE_NAME,
+      amountRupees: AMOUNT_RUPEES,
+      upiUri,
+      qrDataUrl,
+    };
+  });
+
+export const claimReservationPaid = createServerFn({ method: "POST" })
   .validator(
     z.object({
       ref: z.string().min(4).max(40),
-      orderId: z.string().min(5),
-      paymentId: z.string().min(5),
-      signature: z.string().min(10),
+      note: z.string().trim().max(400).optional().or(z.literal("")),
     }),
   )
   .handler(async ({ data }) => {
@@ -58,13 +96,8 @@ export const markReservationPaid = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin
       .from("reservations")
       .update({
-        payment_status: "paid",
-        paid_at: new Date().toISOString(),
-        payment_order_id: data.orderId,
-        payment_id: data.paymentId,
-        payment_signature: data.signature,
-        refunded_at: null,
-        refund_reason: null,
+        claimed_paid_at: new Date().toISOString(),
+        payment_note: data.note ? data.note : null,
       })
       .eq("ref", data.ref);
 
@@ -76,7 +109,7 @@ export const adminList = createServerFn({ method: "POST" })
   .validator(
     z.object({
       passcode: z.string().min(1).max(200),
-      filter: z.enum(["all", "pending", "paid", "refunded"]).default("all"),
+      filter: z.enum(["all", "pending", "approved", "rejected"]).default("all"),
     }),
   )
   .handler(async ({ data }) => {
@@ -88,26 +121,25 @@ export const adminList = createServerFn({ method: "POST" })
     let query = supabaseAdmin
       .from("reservations")
       .select(
-        "ref,name,email,phone,notes,amount_paise,payment_status,paid_at,payment_order_id,payment_id,refunded_at,refund_reason,created_at,updated_at",
+        "ref,name,email,phone,amount_paise,status,payment_note,claimed_paid_at,decided_at,created_at,updated_at",
       )
       .order("created_at", { ascending: false });
 
     if (data.filter !== "all") {
-      query = query.eq("payment_status", data.filter);
+      query = query.eq("status", data.filter);
     }
 
     const { data: rows, error } = await query;
-
     if (error) throw new Error(error.message);
     return { rows: rows ?? [] };
   });
 
-export const adminRefund = createServerFn({ method: "POST" })
+export const adminDecide = createServerFn({ method: "POST" })
   .validator(
     z.object({
       passcode: z.string().min(1).max(200),
       ref: z.string().min(4).max(40),
-      reason: z.string().trim().max(400).optional(),
+      decision: z.enum(["approved", "rejected"]),
     }),
   )
   .handler(async ({ data }) => {
@@ -116,27 +148,11 @@ export const adminRefund = createServerFn({ method: "POST" })
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: row, error: rowError } = await supabaseAdmin
-      .from("reservations")
-      .select("payment_id,amount_paise,payment_status")
-      .eq("ref", data.ref)
-      .maybeSingle();
-
-    if (rowError) throw new Error(rowError.message);
-    if (!row) throw new Error("Reservation not found.");
-    if (!row.payment_id) throw new Error("No payment ID exists for this reservation.");
-    if (row.payment_status === "refunded") {
-      return { ok: true };
-    }
-
-    await refundRazorpayPayment(row.payment_id, row.amount_paise, data.reason);
-
     const { error } = await supabaseAdmin
       .from("reservations")
       .update({
-        payment_status: "refunded",
-        refunded_at: new Date().toISOString(),
-        refund_reason: data.reason ?? null,
+        status: data.decision,
+        decided_at: new Date().toISOString(),
       })
       .eq("ref", data.ref);
 
