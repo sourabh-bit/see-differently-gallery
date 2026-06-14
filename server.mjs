@@ -1,10 +1,59 @@
 import { createServer } from "node:http";
+import { createReadStream } from "node:fs";
+import { access } from "node:fs/promises";
+import path from "node:path";
 import { Readable } from "node:stream";
+import { fileURLToPath } from "node:url";
 
 const port = Number.parseInt(process.env.PORT ?? "10000", 10);
 const host = process.env.HOST ?? "0.0.0.0";
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const clientDir = path.join(__dirname, "dist", "client");
 
 const { default: server } = await import("./dist/server/server.js");
+
+const contentTypes = new Map([
+  [".css", "text/css; charset=utf-8"],
+  [".js", "application/javascript; charset=utf-8"],
+  [".mjs", "application/javascript; charset=utf-8"],
+  [".json", "application/json; charset=utf-8"],
+  [".svg", "image/svg+xml"],
+  [".png", "image/png"],
+  [".jpg", "image/jpeg"],
+  [".jpeg", "image/jpeg"],
+  [".webp", "image/webp"],
+  [".gif", "image/gif"],
+  [".ico", "image/x-icon"],
+  [".woff", "font/woff"],
+  [".woff2", "font/woff2"],
+]);
+
+function getContentType(filePath) {
+  return contentTypes.get(path.extname(filePath).toLowerCase()) ?? "application/octet-stream";
+}
+
+async function serveStaticAsset(urlPath, res) {
+  const normalizedPath = path.normalize(urlPath).replace(/^([.][.][/\\])+/, "");
+  const filePath = path.join(clientDir, normalizedPath);
+  const resolvedClientDir = path.resolve(clientDir);
+  const resolvedFilePath = path.resolve(filePath);
+
+  if (!resolvedFilePath.startsWith(resolvedClientDir)) {
+    return false;
+  }
+
+  try {
+    await access(resolvedFilePath);
+  } catch {
+    return false;
+  }
+
+  res.statusCode = 200;
+  res.setHeader("content-type", getContentType(resolvedFilePath));
+  res.setHeader("cache-control", "public, max-age=31536000, immutable");
+  createReadStream(resolvedFilePath).pipe(res);
+  return true;
+}
 
 function buildRequest(req) {
   const origin = `http://${req.headers.host ?? `${host}:${port}`}`;
@@ -52,6 +101,13 @@ async function sendResponse(res, response) {
 
 createServer(async (req, res) => {
   try {
+    const url = new URL(req.url ?? "/", `http://${req.headers.host ?? `${host}:${port}`}`);
+
+    if (url.pathname.startsWith("/assets/")) {
+      const served = await serveStaticAsset(url.pathname, res);
+      if (served) return;
+    }
+
     const response = await server.fetch(buildRequest(req), undefined, undefined);
     await sendResponse(res, response);
   } catch (error) {
