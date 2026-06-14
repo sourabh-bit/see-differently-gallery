@@ -1,7 +1,9 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import portrait from "@/assets/hero-portrait.jpg";
 
 export function Hero() {
+  const heroVideoSrc = import.meta.env.VITE_HERO_VIDEO_URL?.trim();
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const zoom = useTransform(scrollYProgress, [0, 1], [1, 1.18]);
@@ -16,14 +18,13 @@ export function Hero() {
       className="relative min-h-[100vh] md:min-h-[110vh] bg-paper grain overflow-hidden"
     >
       <div className="grid grid-cols-1 md:grid-cols-12 min-h-[100vh] pt-24 md:pt-32 pb-12 md:pb-16 px-6 md:px-12 gap-10 md:gap-8">
-        {/* Left: typography */}
         <motion.div
           style={{ opacity: fade }}
           className="md:col-span-7 flex flex-col justify-center min-w-0 order-2 md:order-1"
         >
           <div className="mono text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-graphite mb-6 md:mb-10">
             <span className="inline-block w-6 md:w-8 h-px bg-ink align-middle mr-3" />
-            Masterclass · 001
+            Masterclass 001
           </div>
           <h1 className="serif font-light leading-[0.9] tracking-[-0.04em]">
             <motion.span
@@ -69,41 +70,50 @@ export function Hero() {
             </div>
             <div>
               <div className="text-ink serif text-2xl md:text-3xl normal-case tracking-normal">
-                ∞
+                Infinity
               </div>
               <div className="mt-1">After replay</div>
             </div>
           </div>
         </motion.div>
 
-        {/* Right: video loop */}
-        <div className="md:col-span-5 relative order-1 md:order-2">
-          <div className="relative h-[42vh] md:h-full overflow-hidden" data-cursor="image">
-            <motion.video
-              autoPlay
-              muted
-              loop
-              playsInline
-              style={{ scale: zoom }}
-              className="w-full h-full object-cover"
-              poster="https://images.pexels.com/photos/3060250/pexels-photo-3060250.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-            >
-              <source
-                src="https://videos.pexels.com/video-files/3209828/3209828-hd_1920_1080_25fps.mp4"
-                type="video/mp4"
+        <div className="md:col-span-5 relative order-1 md:order-2 flex items-start md:items-center justify-center">
+          <div
+            className="relative w-full max-w-[340px] sm:max-w-[390px] md:max-w-[460px] aspect-[5/8] overflow-hidden rounded-[1.5rem] shadow-[0_30px_80px_rgba(0,0,0,0.12)]"
+            data-cursor="image"
+          >
+            {heroVideoSrc ? (
+              <motion.video
+                src={heroVideoSrc}
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="metadata"
+                aria-label="Hero video"
+                style={{ scale: zoom }}
+                className="relative z-10 w-full h-full object-cover object-center bw-img"
               />
-            </motion.video>
+            ) : (
+              <motion.img
+                src={portrait}
+                alt="Photographer holding smartphone as viewfinder"
+                width={1024}
+                height={1208}
+                style={{ scale: zoom }}
+                className="relative z-10 w-full h-full object-cover object-center bw-img"
+              />
+            )}
             <div className="absolute top-3 left-3 md:top-4 md:left-4 mono text-[9px] md:text-[10px] tracking-[0.25em] uppercase text-paper mix-blend-difference">
-              R.A · Frame 014
+              R.A - Frame 014
             </div>
             <div className="absolute bottom-3 right-3 md:bottom-4 md:right-4 mono text-[9px] md:text-[10px] tracking-[0.25em] uppercase text-paper mix-blend-difference">
-              ISO 400 · f2.8
+              ISO 400 - f2.8
             </div>
           </div>
         </div>
       </div>
 
-      {/* Diagonal line, like the reference */}
       <svg
         aria-hidden
         className="pointer-events-none absolute inset-x-6 md:inset-x-12 bottom-6 h-px"
