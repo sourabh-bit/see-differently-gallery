@@ -76,17 +76,23 @@ export function Hero() {
           </div>
         </motion.div>
 
-        {/* Right: portrait */}
+        {/* Right: video loop */}
         <div className="md:col-span-5 relative order-1 md:order-2">
           <div className="relative h-[42vh] md:h-full overflow-hidden" data-cursor="image">
-            <motion.img
-              src={portrait}
-              alt="Photographer holding smartphone as viewfinder"
-              width={1024}
-              height={1208}
+            <motion.video
+              autoPlay
+              muted
+              loop
+              playsInline
               style={{ scale: zoom }}
-              className="w-full h-full object-cover bw-img"
-            />
+              className="w-full h-full object-cover"
+              poster="https://images.pexels.com/photos/3060250/pexels-photo-3060250.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+            >
+              <source
+                src="https://videos.pexels.com/video-files/3209828/3209828-hd_1920_1080_25fps.mp4"
+                type="video/mp4"
+              />
+            </motion.video>
             <div className="absolute top-3 left-3 md:top-4 md:left-4 mono text-[9px] md:text-[10px] tracking-[0.25em] uppercase text-paper mix-blend-difference">
               R.A · Frame 014
             </div>
